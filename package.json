@@ -1,0 +1,38 @@
+{
+  "name": "rice-roots-and-rolls",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "predeploy": "npm run build && node -e \"const fs = require('fs'); fs.copyFileSync('dist/index.html', 'dist/404.html');\"",
+    "deploy": "gh-pages -d dist"
+  },
+  "keywords": [
+    "cambodian-food",
+    "sushi",
+    "spring-lake-nc",
+    "fort-bragg",
+    "rice-roots-and-rolls",
+    "chef-a"
+  ],
+  "author": "Lauren David Alvarado (Valheon Solutions LLC) & Chef A (Rice, Roots & Rolls)",
+  "license": "ISC",
+  "description": "Official Digital Platform, Mobile Menu, Wayfinding Hub & iPhone Pocket Admin for Rice, Roots & Rolls – An Asian Kitchen (1124 N Bragg Blvd, Spring Lake, NC 28390).",
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "gh-pages": "^6.3.0",
+    "tailwindcss": "^4.1.4",
+    "vite": "^6.2.0"
+  },
+  "dependencies": {
+    "clsx": "^2.1.1",
+    "html2canvas": "^1.4.1",
+    "lucide-react": "^1.54.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^3.0.2"
+  }
+}
