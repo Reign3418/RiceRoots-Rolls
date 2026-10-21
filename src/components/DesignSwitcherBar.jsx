@@ -48,7 +48,7 @@ export default function DesignSwitcherBar() {
   const currentTheme = themes.find(t => t.id === themeVersion) || themes[0];
 
   return (
-    <div className="fixed bottom-20 md:bottom-6 right-3 md:right-6 z-50 flex flex-col items-end">
+    <div className="hidden md:flex fixed bottom-6 right-6 z-50 flex-col items-end">
       {/* Expanded Studio & Chef Control Popover */}
       {isExpanded && (
         <div className="mb-3 w-[310px] sm:w-[340px] rounded-3xl bg-[#161311]/95 backdrop-blur-2xl border border-white/15 p-4 shadow-[0_25px_70px_rgba(0,0,0,0.75)] text-[#F5F0E6] animate-fadeIn space-y-4">

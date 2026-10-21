@@ -55,80 +55,82 @@ export default function OrderDrawer() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex justify-end bg-black/75 backdrop-blur-sm animate-fadeIn"
+      className="fixed inset-0 z-50 flex items-end sm:items-stretch justify-end bg-black/70 backdrop-blur-sm animate-fadeIn"
       onClick={() => setIsCartOpen(false)}
     >
       <div
-        className="bg-[#181411] border-l-2 border-[#C89D54] w-full max-w-full sm:max-w-md h-full flex flex-col shadow-2xl text-[#F5F0E6]"
+        className="bg-[#181512] rounded-t-3xl sm:rounded-none border-t sm:border-t-0 sm:border-l border-white/15 w-full sm:max-w-md max-h-[88vh] sm:h-full flex flex-col shadow-2xl text-[#F5EFE6]"
         onClick={e => e.stopPropagation()}
       >
+        {/* Mobile Pull Handle */}
+        <div className="sm:hidden flex justify-center pt-2.5 pb-1">
+          <div className="w-10 h-1 rounded-full bg-white/20" />
+        </div>
+
         {/* Header */}
-        <div className="bg-[#211B16] border-b border-[#362E26] p-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-none bg-[#C89D54] text-[#14110F] font-black">
-              <ShoppingBag className="w-5 h-5" />
+        <div className="border-b border-white/10 px-5 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-[#C89D54] text-[#14110F] flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xl font-bold font-serif-editorial text-white leading-none">
-                Your Takeout Order Tray
+              <h3 className="text-lg font-bold font-serif text-white leading-none">
+                Your Order Bag
               </h3>
-              <p className="text-xs text-[#A69B8D] mt-0.5">
-                {cartItemCount} {cartItemCount === 1 ? 'dish' : 'dishes'} • Pickup at 1124 N Bragg Blvd
+              <p className="text-xs text-[#A59B8F] mt-1">
+                {cartItemCount} {cartItemCount === 1 ? 'dish' : 'dishes'} • 1124 N Bragg Blvd
               </p>
             </div>
           </div>
 
           <button
             onClick={() => setIsCartOpen(false)}
-            className="p-1.5 rounded-none bg-[#2C241E] hover:bg-[#3D322A] text-[#D5CCC0] hover:text-white cursor-pointer"
+            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 text-white flex items-center justify-center cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Cart Items */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        <div className="flex-1 overflow-y-auto p-4 space-y-2.5">
           {cart.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-center p-6 text-[#A69B8D]">
+            <div className="h-full flex flex-col items-center justify-center text-center p-8 text-[#A59B8F]">
               <ShoppingBag className="w-10 h-10 text-[#C89D54] mb-3" />
-              <h4 className="text-base font-bold text-white">Your takeout tray is empty</h4>
-              <p className="text-xs text-[#A69B8D] mt-1 max-w-xs">
-                Tap “+ Add to Order” on any Cambodian pho, grilled pork plate, Chinese special, or hand-rolled sushi roll to build your meal!
+              <h4 className="text-base font-bold text-white">Your order bag is empty</h4>
+              <p className="text-xs mt-1 max-w-xs">
+                Tap + on any dish or sushi roll to build your pickup or dine-in order.
               </p>
             </div>
           ) : (
             cart.map((item, idx) => (
               <div
                 key={idx}
-                className="bg-[#211B16] border border-[#362E26] p-3 flex items-center justify-between gap-3"
+                className="rounded-2xl bg-white/[0.05] border border-white/10 p-3.5 flex items-center justify-between gap-3"
               >
                 <div className="min-w-0 flex-1">
                   <h4 className="text-sm font-bold text-white truncate">{item.name}</h4>
-                  {item.extraDetails && (
-                    <p className="text-[11px] text-[#C89D54] italic">{item.extraDetails}</p>
-                  )}
-                  <p className="text-xs font-bold text-[#C89D54] font-mono-tech mt-0.5">
+                  <p className="text-xs font-bold text-[#C89D54] mt-0.5">
                     ${(item.price * item.quantity).toFixed(2)}{' '}
-                    <span className="text-[10px] text-[#8C8275] font-sans">
+                    <span className="text-[10px] text-[#8E8478] font-normal">
                       (${item.price.toFixed(2)} ea)
                     </span>
                   </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 shrink-0">
-                  <div className="flex items-center bg-[#14110F] border border-[#362E26] p-0.5">
+                <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center rounded-full bg-black/40 border border-white/10 p-0.5">
                     <button
                       onClick={() => updateCartQty(idx, -1)}
-                      className="p-1 text-[#A69B8D] hover:text-white cursor-pointer"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white cursor-pointer"
                     >
                       <Minus className="w-3.5 h-3.5" />
                     </button>
-                    <span className="px-2 text-xs font-bold text-white font-mono-tech">
+                    <span className="px-2 text-xs font-bold text-white">
                       {item.quantity}
                     </span>
                     <button
                       onClick={() => updateCartQty(idx, 1)}
-                      className="p-1 text-[#A69B8D] hover:text-white cursor-pointer"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white cursor-pointer"
                     >
                       <Plus className="w-3.5 h-3.5" />
                     </button>
@@ -136,7 +138,7 @@ export default function OrderDrawer() {
 
                   <button
                     onClick={() => removeFromCart(idx)}
-                    className="p-1.5 text-[#A69B8D] hover:text-[#E58B7B] cursor-pointer"
+                    className="w-7 h-7 rounded-full flex items-center justify-center text-white/50 hover:text-[#EF4444] cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -148,73 +150,63 @@ export default function OrderDrawer() {
 
         {/* Footer */}
         {cart.length > 0 && (
-          <div className="bg-[#211B16] border-t border-[#362E26] p-4 space-y-3">
-            <div className="space-y-1 text-xs text-[#D5CCC0]">
+          <div className="bg-[#120F0D] border-t border-white/10 p-5 space-y-3">
+            <div className="space-y-1 text-xs text-[#C6BCB0]">
               <div className="flex justify-between">
-                <span>Subtotal:</span>
-                <span className="font-mono-tech">${cartTotal.toFixed(2)}</span>
+                <span>Subtotal</span>
+                <span>${cartTotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-[#A69B8D]">
-                <span>Est. NC Tax (7%):</span>
-                <span className="font-mono-tech">${estimatedTax.toFixed(2)}</span>
+              <div className="flex justify-between text-[#8E8478]">
+                <span>Est. NC Tax (7%)</span>
+                <span>${estimatedTax.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-base font-extrabold text-white pt-2 border-t border-[#362E26]">
-                <span>Estimated Pickup Total:</span>
-                <span className="text-[#C89D54] font-mono-tech text-lg">${grandTotal.toFixed(2)}</span>
+              <div className="flex justify-between text-base font-bold text-white pt-2 border-t border-white/10">
+                <span>Estimated Total</span>
+                <span className="text-[#C89D54] font-serif text-lg">${grandTotal.toFixed(2)}</span>
               </div>
             </div>
 
             <div className="space-y-2 pt-1">
               <a
                 href={`tel:${businessInfo.phoneRaw}`}
-                className="w-full flex items-center justify-center gap-2 bg-[#2E5A44] hover:bg-[#3A7055] text-white font-extrabold py-3 rounded-none text-sm transition shadow-lg"
+                className="w-full flex items-center justify-center gap-2 bg-[#C89D54] hover:bg-[#D7AE66] text-[#14110F] font-bold py-3 rounded-full text-xs transition shadow-lg"
               >
-                <Phone className="w-4 h-4 text-[#C89D54]" />
-                <span>Call Kitchen to Order: {businessInfo.phone}</span>
+                <Phone className="w-4 h-4" />
+                <span>Call Kitchen to Place Order • {businessInfo.phone}</span>
               </a>
 
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={handleSmsOrder}
-                  className="flex items-center justify-center gap-1.5 bg-[#2B241E] hover:bg-[#382F27] border border-[#4A3F35] text-[#C89D54] font-bold py-2 rounded-none text-xs cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white font-semibold py-2.5 rounded-full text-xs cursor-pointer"
                 >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Text Order Summary</span>
+                  <MessageSquare className="w-3.5 h-3.5 text-[#C89D54]" />
+                  <span>Text Order</span>
                 </button>
 
                 <button
                   onClick={handleCopyOrder}
-                  className="flex items-center justify-center gap-1.5 bg-[#2B241E] hover:bg-[#382F27] border border-[#4A3F35] text-[#F5F0E6] font-bold py-2 rounded-none text-xs cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 bg-white/10 hover:bg-white/15 text-white font-semibold py-2.5 rounded-full text-xs cursor-pointer"
                 >
                   {copied ? (
                     <>
-                      <Check className="w-3.5 h-3.5 text-[#68B684]" />
-                      <span className="text-[#68B684]">Copied!</span>
+                      <Check className="w-3.5 h-3.5 text-[#52B788]" />
+                      <span className="text-[#52B788]">Copied!</span>
                     </>
                   ) : (
-                    <span>Copy Order List</span>
+                    <span>Copy Summary</span>
                   )}
                 </button>
               </div>
-
-              <a
-                href={businessInfo.googleMapsShortUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="w-full flex items-center justify-center gap-1.5 bg-[#14110F] border border-[#362E26] text-[#D5CCC0] hover:text-white py-2 text-xs font-bold"
-              >
-                <Navigation className="w-3.5 h-3.5 text-[#C89D54]" />
-                <span>Directions to 1124 N Bragg Blvd, Spring Lake</span>
-              </a>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] text-[#8C8275] pt-1">
-              <span>Dine-In &amp; Takeout Pickup</span>
+            <div className="flex items-center justify-between text-[11px] text-[#8E8478] pt-1">
+              <span>Pickup at 1124 N Bragg Blvd</span>
               <button
                 onClick={clearCart}
-                className="text-[#A69B8D] hover:text-[#E58B7B] underline cursor-pointer"
+                className="text-[#A59B8F] hover:text-white underline cursor-pointer"
               >
-                Clear Tray
+                Clear Bag
               </button>
             </div>
           </div>
