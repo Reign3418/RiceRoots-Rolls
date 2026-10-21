@@ -17,8 +17,72 @@ import {
   ChefHat,
   SearchCode,
   Compass,
-  Car
+  Car,
+  ArrowUpRight,
+  Flame
 } from 'lucide-react';
+
+// Map specific dish IDs to real high-res food photos in public/images/
+const DISH_THUMBNAILS = {
+  se_kathiew: './images/hero-khmer-beef.png',
+  se_bai_saik_chruk: './images/hero-khmer-beef.png',
+  se_noodle_bowl: './images/catering-egg-rolls.jpg',
+  sq_wyoming_cowboy: './images/specialty-sushi-closeup.jpg',
+  sq_screaming_eagle: './images/rainbow-roll-cutout.png',
+  sq_24th_id: './images/specialty-sushi-closeup.jpg',
+  sq_all_american: './images/rainbow-roll-cutout.png',
+  ss_khmer_crudo: './images/khmer-crudo.jpg',
+  ss_tempura_battered: './images/shrimp-tempura.jpg',
+  cr_rainbow: './images/rainbow-roll-cutout.png',
+  cr_dragon: './images/specialty-sushi-closeup.jpg',
+  cr_shrimp_tempura: './images/shrimp-tempura.jpg',
+  st_egg_rolls: './images/catering-egg-rolls.jpg',
+  st_shrimp_tempura: './images/shrimp-tempura.jpg',
+  ch_sesame_chicken: './images/catering-buffet.jpg'
+};
+
+const CATEGORY_META = {
+  southeastSpecials: {
+    label: 'Khmer & Southeast Asian',
+    accent: 'From Chef A’s Cambodian Family Kitchen',
+    heroImg: './images/hero-khmer-beef.png'
+  },
+  chefsSpecials: {
+    label: "Chef's Khmer Traditions",
+    accent: 'Slow-Simmered Curries, Whole Crispy Fish & Kreung Soup',
+    heroImg: './images/story-roots.jpg'
+  },
+  squadLeaderSushi: {
+    label: 'Squad Leader Specialty Rolls',
+    accent: 'Hand-Rolled Tribute to Fort Bragg & Lander, WY',
+    heroImg: './images/specialty-sushi-closeup.jpg'
+  },
+  sushiStarters: {
+    label: 'Crudo & Sushi Starters',
+    accent: 'Sashimi-Grade Salmon & Crispy Tempura',
+    heroImg: './images/khmer-crudo.jpg'
+  },
+  classicRolls: {
+    label: 'Classic Sushi Bar Rolls',
+    accent: 'Rolled Fresh to Order with Warm Seasoned Rice',
+    heroImg: './images/rainbow-roll-cutout.png'
+  },
+  startersAndSides: {
+    label: 'Crispy Starters & Sides',
+    accent: 'Hand-Rolled Khmer Egg Rolls, Crab Rangoon & Gyoza',
+    heroImg: './images/catering-egg-rolls.jpg'
+  },
+  soups: {
+    label: 'House-Simmered Soups',
+    accent: 'Wonton, Egg Drop & Hot and Sour',
+    heroImg: './images/story-rice.jpg'
+  },
+  chineseFavorites: {
+    label: 'Wok-Fired Classics',
+    accent: 'High-Heat Wok Favorites Served with Steamed Jasmine Rice',
+    heroImg: './images/catering-buffet.jpg'
+  }
+};
 
 export default function AngkorSanctuaryLayout() {
   const {
@@ -75,508 +139,540 @@ export default function AngkorSanctuaryLayout() {
   };
 
   const categories = [
-    { key: 'all', label: 'All Menu (36 Dishes)' },
-    { key: 'southeastSpecials', label: 'Southeast & Khmer Specials' },
-    { key: 'chefsSpecials', label: "Chef's Khmer Specials" },
-    { key: 'squadLeaderSushi', label: 'Squad Leader Specialty Sushi' },
-    { key: 'sushiStartersAndStandard', label: 'Sushi Starters & Rolls' },
-    { key: 'chineseSpecials', label: 'Chinese Specials' },
-    { key: 'appetizersAndDrinks', label: 'Appetizers & Drinks' }
+    { key: 'all', label: 'All Dishes (36)' },
+    { key: 'southeastSpecials', label: 'Khmer Specials' },
+    { key: 'chefsSpecials', label: "Chef's Traditions" },
+    { key: 'squadLeaderSushi', label: 'Squad Leader Rolls' },
+    { key: 'sushiStarters', label: 'Crudo & Sushi Apps' },
+    { key: 'classicRolls', label: 'Classic Rolls' },
+    { key: 'startersAndSides', label: 'Egg Rolls & Starters' },
+    { key: 'soups', label: 'Soups' },
+    { key: 'chineseFavorites', label: 'Wok Classics' }
   ];
 
-  const getFilteredCategories = () => {
-    const entries =
-      activeCategory === 'all'
-        ? Object.entries(menu)
-        : [[activeCategory, menu[activeCategory]]];
-
-    if (!searchQuery.trim()) return entries;
-    const q = searchQuery.toLowerCase();
-    return entries
-      .map(([k, cat]) => {
-        const filteredItems = cat.items.filter(
-          i =>
-            !i.hidden &&
-            (i.name.toLowerCase().includes(q) ||
-              (i.description && i.description.toLowerCase().includes(q)))
-        );
-        return [k, { ...cat, items: filteredItems }];
-      })
-      .filter(([, cat]) => cat.items.length > 0);
+  const getStatusGlow = () => {
+    switch (liveStatus.mode) {
+      case 'commute_delay':
+      case 'family_early':
+        return 'bg-[#362612]/90 border-[#D99B26]/40 text-[#FDE68A]';
+      case 'catering_only':
+        return 'bg-[#2E1A16]/90 border-[#C87D55]/40 text-[#FCD5CE]';
+      case 'closed_today':
+        return 'bg-[#2D1515]/90 border-[#EF4444]/40 text-[#FECACA]';
+      default:
+        return 'bg-[#17281E]/90 border-[#4A7C59]/50 text-[#D8F3DC]';
+    }
   };
 
+  const visibleSpecials = specials.filter(s => !s.hidden);
+
   return (
-    <div className="bg-[#14110F] text-[#F5F0E6] w-full max-w-full overflow-x-hidden">
-      {/* 1. LIVE MARQUEE & COMMUTE STATUS BAR */}
-      <div className="bg-[#1B2A21] border-b border-[#344E3E] py-2 px-3 text-xs">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2 text-center sm:text-left">
-            <span className="bg-[#C89D54] text-[#14110F] text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-none shrink-0 font-mono-tech">
-              {liveStatus.badgeText}
-            </span>
-            <span className="text-[#E6F0E9] font-medium">{liveStatus.topMarquee}</span>
+    <div className="min-h-screen bg-[#0F0D0B] text-[#F5EFE6] relative selection:bg-[#C89D54] selection:text-[#0F0D0B] overflow-x-hidden">
+      {/* Subtle Ambient Warm Glows & Botanical Steam */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="absolute -top-40 -left-40 w-[550px] h-[550px] rounded-full bg-[#C89D54]/[0.07] blur-[140px]" />
+        <div className="absolute top-[30%] -right-40 w-[500px] h-[500px] rounded-full bg-[#3A5A40]/[0.08] blur-[150px]" />
+        <div className="absolute bottom-20 left-1/4 w-[600px] h-[600px] rounded-full bg-[#9E4734]/[0.06] blur-[160px]" />
+      </div>
+      <BotanicalSteamCanvas />
+
+      {/* Live Status Top Pill Strip */}
+      <div className="relative z-30 pt-3 px-4">
+        <div className={`max-w-6xl mx-auto rounded-full border px-4 py-2 backdrop-blur-xl transition-all flex flex-wrap items-center justify-between gap-2 text-xs ${getStatusGlow()}`}>
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-current animate-ping" />
+            <span className="font-bold tracking-wide">{liveStatus.badgeText}</span>
+            <span className="hidden md:inline opacity-80">• {liveStatus.headline}</span>
           </div>
-          <div className="flex items-center gap-3 shrink-0 font-mono-tech text-[11px] text-[#C89D54]">
-            <a href={`tel:${businessInfo.phoneRaw}`} className="hover:underline font-bold">
-              📞 {businessInfo.phone}
-            </a>
-            <span>•</span>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline opacity-75">{liveStatus.customHoursToday}</span>
             <button
               onClick={() => setIsChefAdminOpen(true)}
-              className="underline hover:text-white cursor-pointer"
+              className="underline decoration-dotted opacity-85 hover:opacity-100 font-semibold cursor-pointer"
             >
-              Chef Update ({liveStatus.lastUpdated})
+              Chef A Status Sync
             </button>
           </div>
         </div>
       </div>
 
-      {/* 2. NAVIGATION HEADER */}
-      <header className="bg-[#181411]/95 backdrop-blur-md border-b border-[#2E2721] sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 py-3.5 flex flex-col md:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3.5">
-            <img
-              src="./images/chef-a-food-truck.jpg"
-              alt="Chef A — Rice, Roots & Rolls"
-              className="w-12 h-12 sm:w-14 sm:h-14 object-cover border-2 border-[#C89D54]"
-            />
-            <div>
-              <span className="text-[10px] font-mono-tech uppercase tracking-widest text-[#C89D54] block font-bold">
-                Cambodian • Chinese • Hand-Rolled Sushi
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold font-serif-editorial text-[#F5F0E6] tracking-wide leading-none">
-                Rice, Roots &amp; Rolls
-              </h1>
-              <p className="text-[11px] text-[#A69B8D] mt-0.5">
-                1124 N Bragg Blvd, Spring Lake, NC • Minutes from Fort Bragg
-              </p>
+      {/* Floating Glassmorphic Navigation Capsule */}
+      <header className="sticky top-3 z-40 px-4 mt-3">
+        <div className="max-w-6xl mx-auto rounded-full bg-[#181512]/85 backdrop-blur-2xl border border-white/10 px-5 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center justify-between gap-4">
+          <a href="#top" className="flex items-center gap-3.5 group">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#C89D54] to-[#8C6528] p-0.5 shadow-md">
+              <div className="w-full h-full rounded-full bg-[#14110F] flex items-center justify-center">
+                <span className="font-serif text-lg font-bold text-[#C89D54]">R</span>
+              </div>
             </div>
-          </div>
+            <div>
+              <span className="font-serif text-lg sm:text-xl font-bold tracking-tight text-[#F7F2E9] block leading-none">
+                Rice, Roots &amp; Rolls
+              </span>
+              <span className="text-[10px] tracking-[0.22em] uppercase text-[#C89D54] font-semibold block mt-1">
+                An Asian Kitchen • Spring Lake
+              </span>
+            </div>
+          </a>
 
-          <nav className="flex items-center flex-wrap justify-center gap-2 text-xs font-bold">
-            <a
-              href="#wayfinding"
-              className="px-3 py-2 bg-[#211C18] hover:bg-[#2C2520] border border-[#382F28] text-[#E6DEC8] flex items-center gap-1.5"
-            >
-              <Compass className="w-3.5 h-3.5 text-[#C89D54]" />
-              <span>Find Us on Bragg Blvd</span>
+          <nav className="hidden lg:flex items-center gap-1 bg-white/[0.04] rounded-full p-1 border border-white/5 text-xs font-medium text-[#D8CFC2]">
+            <a href="#featured" className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition">
+              Signatures
             </a>
-            <a
-              href="#menu-section"
-              className="px-3 py-2 bg-[#211C18] hover:bg-[#2C2520] border border-[#382F28] text-[#E6DEC8]"
-            >
+            <a href="#menu" className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition">
               Full Menu
             </a>
-            <a
-              href="#meaning-story"
-              className="px-3 py-2 bg-[#211C18] hover:bg-[#2C2520] border border-[#382F28] text-[#E6DEC8]"
-            >
-              Our Story &amp; Roots
+            <a href="#roots" className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition">
+              Chef A’s Story
             </a>
-            <a
-              href="#catering-section"
-              className="px-3 py-2 bg-[#211C18] hover:bg-[#2C2520] border border-[#382F28] text-[#E6DEC8]"
-            >
+            <a href="#wayfinding" className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition">
+              1124 N Bragg Blvd
+            </a>
+            <a href="#catering" className="px-4 py-2 rounded-full hover:bg-white/10 hover:text-white transition">
               Catering
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPrintableMenuOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/[0.06] hover:bg-white/12 border border-white/10 text-xs font-semibold text-[#E8DFD1] transition cursor-pointer"
+            >
+              <FileImage className="w-3.5 h-3.5 text-[#C89D54]" />
+              <span>Menu Boards</span>
+            </button>
+            <a
+              href={businessInfo.googleMapsDirectionsUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white/[0.08] hover:bg-white/15 border border-white/10 text-xs font-semibold text-white transition"
+            >
+              <Navigation className="w-3.5 h-3.5 text-[#C89D54]" />
+              <span className="hidden sm:inline">Directions</span>
             </a>
             <a
               href={`tel:${businessInfo.phoneRaw}`}
-              className="px-4 py-2 bg-[#2E5A44] hover:bg-[#3A7055] text-white border border-[#4A7C59] flex items-center gap-1.5 shadow"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-[#C89D54] to-[#B3863E] hover:from-[#D5AB63] hover:to-[#C89D54] text-[#120F0D] font-bold text-xs shadow-lg shadow-[#C89D54]/20 transition"
             >
-              <Phone className="w-3.5 h-3.5 text-[#C89D54]" />
-              <span>Call {businessInfo.phone}</span>
+              <Phone className="w-3.5 h-3.5" />
+              <span>{businessInfo.phone}</span>
             </a>
-          </nav>
+          </div>
         </div>
       </header>
 
-      {/* 3. HERO & "NEVER MISS THE TURN ON N BRAGG BLVD" WAYFINDING */}
-      <section className="relative py-8 sm:py-14 border-b border-[#2E2721] overflow-hidden">
-        <BotanicalSteamCanvas />
+      {/* HERO SECTION — 2026 MICHELIN BENTO & FLOATING CUTOUTS */}
+      <section id="top" className="relative z-20 max-w-6xl mx-auto px-4 pt-8 pb-16 md:pt-12 md:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+          {/* Left Editorial Showcase Card (7 cols) */}
+          <div className="lg:col-span-7 rounded-[2rem] bg-gradient-to-br from-[#1C1815] via-[#151210] to-[#110E0C] border border-white/10 p-7 sm:p-10 md:p-12 flex flex-col justify-between relative overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.65)]">
+            <div className="absolute -right-24 -bottom-24 w-80 h-80 rounded-full bg-[#C89D54]/10 blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 relative z-10 space-y-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            {/* Left 7 Cols: Cultural Vibe & Live Status */}
-            <div className="lg:col-span-7 space-y-5">
-              <div className="inline-flex items-center gap-2 bg-[#1F2D24] border border-[#4A7C59] px-3 py-1 text-xs font-mono-tech text-[#D8E6DC]">
-                <span className="w-2 h-2 bg-[#C89D54]"></span>
-                <span>FRESH INGREDIENTS • FAMILY RECIPES • SPRING LAKE, NC</span>
+            <div className="space-y-6 relative z-10">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#C89D54]/15 border border-[#C89D54]/30 text-[#E5C17B] text-xs font-semibold tracking-wide">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Cambodian Heritage • Wok Classics • Hand-Rolled Sushi</span>
               </div>
 
-              <h2 className="text-3xl sm:text-5xl md:text-6xl font-bold font-serif-editorial text-[#F5F0E6] leading-[1.08]">
-                Where Cambodian Roots, <br />
-                <span className="text-[#C89D54] italic">Hand-Rolled Sushi &amp; Family</span> <br />
-                Meet on Bragg Blvd.
-              </h2>
+              <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#FAF6EE] leading-[1.06]">
+                Every grain tells a{' '}
+                <span className="italic font-normal text-[#C89D54]">family story.</span>
+              </h1>
 
-              <p className="text-sm sm:text-base text-[#D5CCC0] leading-relaxed max-w-2xl">
-                {businessInfo.heroDescription} Born in a little red food truck called{' '}
-                <strong className="text-[#F5F0E6]">Far East Foodie</strong> in Lander, Wyoming and now proudly rooted at{' '}
-                <strong className="text-[#C89D54]">1124 N Bragg Blvd</strong> in Spring Lake, NC.
+              <p className="text-[#C6BCB0] text-base sm:text-lg leading-relaxed max-w-xl font-light">
+                {businessInfo.heroDescription} Born in a little red food truck in Lander, Wyoming and now crafted fresh daily by <strong className="text-[#F5EFE6] font-medium">Chef A</strong> at <strong className="text-[#E5C17B] font-medium">1124 N Bragg Blvd</strong>.
               </p>
 
-              {/* Live Kitchen Status Box */}
-              <div className="bg-[#1C1815] border-l-4 border-[#C89D54] border-y border-r border-[#332B24] p-4 space-y-1.5">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="text-xs font-extrabold uppercase tracking-wider text-[#C89D54]">
-                    {liveStatus.badgeText}
-                  </span>
-                  <span className="text-xs font-mono-tech text-[#A69B8D]">
-                    Today: {liveStatus.customHoursToday}
-                  </span>
-                </div>
-                <p className="text-sm font-bold text-white">{liveStatus.headline}</p>
-                <p className="text-xs text-[#A69B8D]">{liveStatus.subtext}</p>
-              </div>
-
-              {/* 1-Tap iPhone Wayfinding & Order Buttons */}
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+              {/* Action Pills */}
+              <div className="flex flex-wrap items-center gap-3 pt-2">
                 <a
-                  href={businessInfo.googleMapsShortUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#C89D54] hover:bg-[#D6AD65] text-[#14110F] font-extrabold px-5 py-3.5 rounded-none text-xs sm:text-sm uppercase tracking-wider transition shadow-lg"
+                  href="#menu"
+                  className="px-7 py-3.5 rounded-full bg-[#C89D54] hover:bg-[#D7AE66] text-[#120F0D] font-bold text-sm transition shadow-[0_12px_30px_rgba(200,157,84,0.3)] inline-flex items-center gap-2"
                 >
-                  <Navigation className="w-4 h-4" />
-                  <span>1-Tap Google Maps (1124 N Bragg Blvd)</span>
+                  <Utensils className="w-4 h-4" />
+                  <span>Explore the 36-Dish Menu</span>
                 </a>
-
                 <a
-                  href={businessInfo.appleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center justify-center gap-2 bg-[#211C18] hover:bg-[#2E2721] border border-[#4A3F35] text-[#F5F0E6] font-bold px-4 py-3.5 rounded-none text-xs sm:text-sm uppercase tracking-wider transition"
+                  href="#wayfinding"
+                  className="px-6 py-3.5 rounded-full bg-white/[0.06] hover:bg-white/12 border border-white/15 text-[#F5EFE6] font-semibold text-sm transition inline-flex items-center gap-2"
                 >
                   <MapPin className="w-4 h-4 text-[#C89D54]" />
-                  <span>iPhone Apple Maps</span>
-                </a>
-
-                <a
-                  href={`tel:${businessInfo.phoneRaw}`}
-                  className="flex items-center justify-center gap-2 bg-[#2E5A44] hover:bg-[#3A7055] text-white font-bold px-4 py-3.5 rounded-none text-xs sm:text-sm uppercase tracking-wider transition"
-                >
-                  <Phone className="w-4 h-4 text-[#C89D54]" />
-                  <span>Call {businessInfo.phone}</span>
+                  <span>Easy Bragg Blvd Arrival</span>
                 </a>
               </div>
             </div>
 
-            {/* Right 5 Cols: Real Overhead Hero Dish + Serene Dining Room */}
-            <div className="lg:col-span-5 space-y-3">
-              <div className="bg-[#1C1815] border-2 border-[#382F28] p-3 shadow-2xl space-y-3">
-                <div className="relative">
-                  <img
-                    src="./images/hero-khmer-beef.png"
-                    alt="Khmer Char-Grilled Beef & Koh Kong Dipping Sauce at Rice, Roots & Rolls"
-                    className="w-full h-72 sm:h-80 object-cover border border-[#2E2721]"
-                  />
-                  <div className="absolute bottom-3 left-3 right-3 bg-[#14110F]/90 backdrop-blur-sm border border-[#C89D54]/50 p-3">
-                    <span className="text-[10px] font-mono-tech uppercase text-[#C89D54] block font-bold">
-                      Authentic Khmer &amp; Asian Kitchen
+            {/* Bottom Trust & Kitchen Metrics inside Hero Bento */}
+            <div className="grid grid-cols-3 gap-4 pt-8 mt-8 border-t border-white/10 relative z-10">
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-[#C89D54]">5.0 ★</div>
+                <div className="text-xs text-[#9E9488] mt-0.5">Spring Lake Guests</div>
+              </div>
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-[#FAF6EE]">36</div>
+                <div className="text-xs text-[#9E9488] mt-0.5">Scratch Dishes &amp; Rolls</div>
+              </div>
+              <div>
+                <div className="font-serif text-2xl sm:text-3xl font-bold text-[#74C69D]">5 Min</div>
+                <div className="text-xs text-[#9E9488] mt-0.5">From Fort Bragg Gates</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Visual Culinary Showcase Stack (5 cols) */}
+          <div className="lg:col-span-5 flex flex-col gap-6">
+            {/* Top Visual Dish Card — Overhead Khmer Beef & Monstera */}
+            <div className="relative rounded-[2rem] bg-gradient-to-b from-[#231E1A] to-[#151210] border border-white/10 p-6 flex-1 flex flex-col justify-between overflow-hidden group shadow-[0_25px_60px_rgba(0,0,0,0.6)] min-h-[310px]">
+              <div className="flex items-center justify-between relative z-10">
+                <span className="px-3 py-1 rounded-full bg-black/50 backdrop-blur-md border border-white/15 text-[11px] font-semibold text-[#E5C17B]">
+                  Chef A’s Khmer Signature
+                </span>
+                <span className="font-serif text-lg font-bold text-white bg-[#C89D54]/20 border border-[#C89D54]/40 px-3 py-1 rounded-full">
+                  $15.95
+                </span>
+              </div>
+
+              {/* Center Floating Dish Cutout */}
+              <div className="my-2 flex items-center justify-center relative z-10">
+                <img
+                  src="./images/hero-khmer-beef.png"
+                  alt="Khmer Char-Grilled Specialty"
+                  className="w-60 sm:w-64 h-60 sm:h-64 object-contain drop-shadow-[0_25px_35px_rgba(0,0,0,0.85)] group-hover:scale-105 group-hover:rotate-2 transition-all duration-500"
+                />
+              </div>
+
+              <div className="relative z-10 flex items-end justify-between gap-3">
+                <div>
+                  <h2 className="font-serif text-xl font-bold text-white">
+                    Bai Saik Chruk &amp; Kathiew Pho
+                  </h2>
+                  <p className="text-xs text-[#B5ABA0] line-clamp-1 mt-0.5">
+                    House-pickled daikon, aromatic kreung &amp; signature Koh Kong dipping sauce
+                  </p>
+                </div>
+                <a
+                  href="#menu"
+                  className="w-10 h-10 rounded-full bg-[#C89D54] text-[#14110F] flex items-center justify-center shrink-0 hover:scale-105 transition shadow-md"
+                  aria-label="View Khmer Menu"
+                >
+                  <ArrowUpRight className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+
+            {/* Bottom Dual Mini Bento Cards (Sushi Cutout + Tempura Cutout) */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="rounded-3xl bg-[#1A1614] border border-white/10 p-4 flex flex-col justify-between relative overflow-hidden group hover:border-[#C89D54]/40 transition">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-[#C89D54]">
+                  Sushi Bar
+                </span>
+                <img
+                  src="./images/rainbow-roll-cutout.png"
+                  alt="Hand-Rolled Rainbow Roll"
+                  className="w-28 h-24 object-contain mx-auto my-2 drop-shadow-[0_14px_20px_rgba(0,0,0,0.75)] group-hover:scale-110 transition-transform duration-300"
+                />
+                <div>
+                  <div className="font-serif text-sm font-bold text-white">Squad Leader Rolls</div>
+                  <div className="text-[11px] text-[#9E9488]">Hand-rolled to order</div>
+                </div>
+              </div>
+
+              <div className="rounded-3xl bg-[#1A1614] border border-white/10 p-4 flex flex-col justify-between relative overflow-hidden group hover:border-[#C89D54]/40 transition">
+                <span className="text-[10px] uppercase tracking-wider font-bold text-[#74C69D]">
+                  Crispy Starters
+                </span>
+                <img
+                  src="./images/shrimp-tempura-cutout.png"
+                  alt="Golden Shrimp Tempura"
+                  className="w-28 h-24 object-contain mx-auto my-2 drop-shadow-[0_14px_20px_rgba(0,0,0,0.75)] group-hover:scale-110 transition-transform duration-300"
+                />
+                <div>
+                  <div className="font-serif text-sm font-bold text-white">Golden Tempura</div>
+                  <div className="text-[11px] text-[#9E9488]">5pc Shrimp • $9.95</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURED VISUAL SIGNATURES (EDITABLE IN CHEF A'S IPHONE POCKET ADMIN) */}
+      <section id="featured" className="relative z-20 max-w-6xl mx-auto px-4 py-12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C89D54] block mb-2">
+              Curated Plate Gallery
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#FAF6EE]">
+              Chef A’s Signature Creations
+            </h2>
+          </div>
+          <p className="text-xs sm:text-sm text-[#A59B8F] max-w-md">
+            Tap <strong className="text-[#E5C17B]">+ Add</strong> on any dish to build your pickup or dine-in order for quick phone or SMS checkout.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {visibleSpecials.map(item => {
+            const isAdded = addedIds[item.id];
+            return (
+              <div
+                key={item.id}
+                className="rounded-3xl bg-[#181512]/90 border border-white/10 overflow-hidden flex flex-col justify-between group hover:border-[#C89D54]/45 hover:-translate-y-1 transition-all duration-300 shadow-[0_20px_50px_rgba(0,0,0,0.5)]"
+              >
+                <div>
+                  <div className="relative h-48 bg-gradient-to-b from-[#25201B] to-[#181512] overflow-hidden flex items-center justify-center p-3">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover rounded-2xl group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <span className="absolute top-5 left-5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#E5C17B] border border-white/10">
+                      {item.badge}
                     </span>
-                    <p className="text-xs text-[#F5F0E6] font-medium">
-                      Char-grilled Cambodian meats, house-pounded kreung, and zesty Koh Kong dipping sauce.
+                    {!item.inStock && (
+                      <div className="absolute inset-0 bg-black/75 backdrop-blur-xs flex items-center justify-center">
+                        <span className="px-4 py-1.5 rounded-full bg-[#9E4734] text-white text-xs font-bold uppercase">
+                          Sold Out for Today
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-serif text-lg font-bold text-[#FAF6EE] leading-snug">
+                        {item.title}
+                      </h3>
+                      <span className="font-serif text-base font-bold text-[#C89D54] shrink-0">
+                        {item.price}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#A89F93] leading-relaxed line-clamp-3">
+                      {item.description}
                     </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  <img
-                    src="./images/khmer-crudo.jpg"
-                    alt="Khmer Crudo Salmon"
-                    className="w-full h-24 object-cover border border-[#2E2721]"
-                  />
-                  <img
-                    src="./images/specialty-sushi-closeup.jpg"
-                    alt="Hand-Rolled Specialty Sushi"
-                    className="w-full h-24 object-cover border border-[#2E2721]"
-                  />
-                  <img
-                    src="./images/dining-room-interior.jpg"
-                    alt="Serene Botanical Dining Room at 1124 N Bragg Blvd"
-                    className="w-full h-24 object-cover border border-[#2E2721]"
-                  />
+                <div className="px-5 pb-5 pt-2">
+                  <button
+                    disabled={!item.inStock}
+                    onClick={() =>
+                      handleAdd({
+                        id: item.id,
+                        name: item.title,
+                        price: item.price,
+                        numericPrice: item.singlePrice
+                      })
+                    }
+                    className={`w-full py-2.5 px-4 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                      !item.inStock
+                        ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                        : isAdded
+                        ? 'bg-[#4A7C59] text-white'
+                        : 'bg-white/[0.08] hover:bg-[#C89D54] text-[#F5EFE6] hover:text-[#120F0D]'
+                    }`}
+                  >
+                    {isAdded ? (
+                      <>
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Added to Order</span>
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add to Order • {item.price}</span>
+                      </>
+                    )}
+                  </button>
                 </div>
               </div>
-            </div>
-          </div>
-
-          {/* "NEVER MISS OUR TURN ON N BRAGG BLVD" WAYFINDING GUIDE */}
-          <div id="wayfinding" className="bg-[#1A1613] border-2 border-[#382F28] p-5 sm:p-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#2E2721] pb-4 mb-4">
-              <div>
-                <span className="text-[11px] font-mono-tech uppercase tracking-widest text-[#C89D54] font-bold flex items-center gap-1.5">
-                  <Car className="w-4 h-4" />
-                  <span>Brick-and-Mortar Wayfinding Guide • Don’t Miss the Turn!</span>
-                </span>
-                <h3 className="text-xl sm:text-2xl font-bold font-serif-editorial text-white mt-0.5">
-                  How to Spot 1124 N Bragg Blvd Without Driving Past
-                </h3>
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                <a
-                  href={businessInfo.googleMapsShortUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 bg-[#C89D54] text-[#14110F] font-extrabold text-xs uppercase tracking-wider"
-                >
-                  Open Google Maps Pin
-                </a>
-                <a
-                  href={businessInfo.wazeUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-3.5 py-2 bg-[#25201B] border border-[#3D332B] text-[#E6DEC8] font-bold text-xs uppercase tracking-wider"
-                >
-                  Open in Waze
-                </a>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-              {businessInfo.wayfindingLandmarks.map((lm, i) => (
-                <div key={i} className="bg-[#14110F] border border-[#2E2721] p-4 space-y-1.5">
-                  <strong className="text-[#C89D54] block font-mono-tech uppercase text-[11px]">
-                    {lm.direction}
-                  </strong>
-                  <p className="text-[#D5CCC0] leading-relaxed">{lm.cue}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+            );
+          })}
         </div>
       </section>
 
-      {/* 4. FEATURED SIGNATURE DISHES SPOTLIGHT */}
-      <section className="py-10 sm:py-12 bg-[#181411] border-b border-[#2E2721]">
-        <div className="max-w-7xl mx-auto px-4 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+      {/* FULL 36-DISH INTERACTIVE MENU — MODERN ROUNDED BENTO CARDS */}
+      <section id="menu" className="relative z-20 max-w-6xl mx-auto px-4 py-16">
+        <div className="rounded-[2.25rem] bg-[#161311]/90 border border-white/10 p-6 sm:p-10 shadow-[0_30px_90px_rgba(0,0,0,0.65)]">
+          {/* Header & Search Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-white/10">
             <div>
-              <span className="text-xs font-mono-tech uppercase tracking-widest text-[#C89D54] font-bold">
-                Chef A’s Signature Creations
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C89D54] block mb-2">
+                Full Kitchen &amp; Sushi Bar Menu
               </span>
-              <h2 className="text-2xl sm:text-4xl font-bold font-serif-editorial text-white mt-0.5">
-                Four Must-Try Dishes from Our Kitchen &amp; Sushi Bar
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#FAF6EE]">
+                Crafted Fresh to Order
               </h2>
+              <p className="text-xs sm:text-sm text-[#A59B8F] mt-1">
+                Every dish and roll verified directly from Chef A’s Spring Lake kitchen boards.
+              </p>
             </div>
-            <button
-              onClick={() => setIsPrintableMenuOpen(true)}
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-[#C89D54] hover:underline cursor-pointer"
-            >
-              <FileImage className="w-4 h-4" />
-              <span>View Original Printable Menu Boards</span>
-            </button>
+
+            {/* Search Input + Official Menu Photos Button */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative min-w-[260px]">
+                <Search className="w-4 h-4 text-[#9E9488] absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search pho, ribeye roll, curry, tempura..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-white/[0.06] border border-white/12 text-xs text-white placeholder-[#8A8075] focus:outline-none focus:border-[#C89D54]"
+                />
+              </div>
+              <button
+                onClick={() => setIsPrintableMenuOpen(true)}
+                className="px-4 py-2.5 rounded-full bg-[#C89D54]/15 hover:bg-[#C89D54]/25 border border-[#C89D54]/35 text-[#E5C17B] text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer shrink-0"
+              >
+                <FileImage className="w-3.5 h-3.5" />
+                <span>View High-Res Menu Boards</span>
+              </button>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {specials.filter(s => !s.hidden).map(spec => {
-              const isUnavailable =
-                !spec.inStock ||
-                (spec.isWok && !liveStatus.wokOpen) ||
-                (spec.isSushi && !liveStatus.sushiOpen);
-              const isAdded = addedIds[spec.id];
-
+          {/* Smooth Pill Category Selector */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-5">
+            {categories.map(cat => {
+              const active = activeCategory === cat.key;
               return (
-                <div
-                  key={spec.id}
-                  className="bg-[#14110F] border border-[#332B24] hover:border-[#C89D54]/60 flex flex-col justify-between transition"
-                >
-                  <div>
-                    <div className="relative h-44 overflow-hidden border-b border-[#2E2721]">
-                      <img
-                        src={spec.image}
-                        alt={spec.title}
-                        className="w-full h-full object-cover"
-                      />
-                      <span className="absolute top-2.5 left-2.5 bg-[#14110F]/90 border border-[#C89D54] text-[#C89D54] text-[10px] font-mono-tech font-bold uppercase px-2 py-0.5">
-                        {spec.badge}
-                      </span>
-                    </div>
-                    <div className="p-4 space-y-2">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <h3 className="text-lg font-bold font-serif-editorial text-white leading-snug">
-                          {spec.title}
-                        </h3>
-                        <span className="text-base font-bold font-mono-tech text-[#C89D54] shrink-0">
-                          {spec.price}
-                        </span>
-                      </div>
-                      <p className="text-xs text-[#A69B8D] leading-relaxed">
-                        {spec.description}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="p-4 pt-0">
-                    <button
-                      onClick={() => handleAdd(spec)}
-                      disabled={isUnavailable}
-                      className={`w-full py-2.5 text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-1.5 cursor-pointer transition ${
-                        isUnavailable
-                          ? 'bg-[#25201B] text-[#6E655B] cursor-not-allowed'
-                          : isAdded
-                          ? 'bg-[#2E5A44] text-white'
-                          : 'bg-[#241E1A] hover:bg-[#C89D54] text-[#F5F0E6] hover:text-[#14110F] border border-[#3D332B]'
-                      }`}
-                    >
-                      {isUnavailable ? (
-                        <span>Currently Sold Out</span>
-                      ) : isAdded ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Added to Tray</span>
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add to Takeout Tray</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. COMPLETE INTERACTIVE SEARCHABLE MENU (ALL 36 REAL ITEMS) */}
-      <section id="menu-section" className="py-12 sm:py-16 bg-[#14110F] border-b border-[#2E2721]">
-        <div className="max-w-7xl mx-auto px-4 space-y-8">
-          <div className="text-center max-w-3xl mx-auto space-y-2">
-            <span className="text-xs font-mono-tech uppercase tracking-widest text-[#C89D54] font-bold">
-              Complete Searchable Kitchen &amp; Sushi Menu
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-bold font-serif-editorial text-white">
-              Authentic Khmer Dishes, Chinese Classics &amp; Hand-Rolled Sushi
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A69B8D]">
-              Every dish is indexed with <code className="font-mono-tech text-[#C89D54]">Schema.org</code> for Google discovery and synced live with Chef A’s iPhone.
-            </p>
-          </div>
-
-          {/* Search & Category Filter Bar */}
-          <div className="space-y-4">
-            <div className="max-w-md mx-auto relative">
-              <Search className="w-4 h-4 text-[#A69B8D] absolute left-3.5 top-3" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Search Kathiew Pho, Bai Saik Chruk, Cowboy Roll, Tempura..."
-                className="w-full bg-[#1C1815] border border-[#382F28] focus:border-[#C89D54] focus:outline-none pl-10 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder-[#8C8275]"
-              />
-            </div>
-
-            <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-              {categories.map(cat => (
                 <button
                   key={cat.key}
                   onClick={() => setActiveCategory(cat.key)}
-                  className={`px-3.5 py-2 rounded-none text-xs font-bold whitespace-nowrap transition cursor-pointer shrink-0 border ${
-                    activeCategory === cat.key
-                      ? 'bg-[#C89D54] text-[#14110F] border-[#C89D54]'
-                      : 'bg-[#1C1815] text-[#D5CCC0] hover:text-white border-[#332B24]'
+                  className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    active
+                      ? 'bg-[#C89D54] text-[#120F0D] font-bold shadow-md shadow-[#C89D54]/20'
+                      : 'bg-white/[0.05] hover:bg-white/10 text-[#C6BCB0] border border-white/5'
                   }`}
                 >
                   {cat.label}
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
 
-          {/* Menu Categories */}
-          <div className="space-y-12">
-            {getFilteredCategories().map(([catKey, categoryData]) => {
-              if (!categoryData) return null;
+          {/* Menu Categories & Modern Rounded Dish Cards */}
+          <div className="space-y-12 mt-4">
+            {Object.entries(menu).map(([catKey, categoryObj]) => {
+              if (activeCategory !== 'all' && activeCategory !== catKey) return null;
+
+              const filteredItems = (categoryObj.items || []).filter(item => {
+                if (item.hidden) return null;
+                if (!searchQuery.trim()) return true;
+                const q = searchQuery.toLowerCase();
+                return (
+                  item.name.toLowerCase().includes(q) ||
+                  (item.description && item.description.toLowerCase().includes(q)) ||
+                  (item.badge && item.badge.toLowerCase().includes(q))
+                );
+              });
+
+              if (filteredItems.length === 0) return null;
+              const meta = CATEGORY_META[catKey] || {};
+
               return (
-                <div key={catKey} className="space-y-4">
-                  <div className="border-b-2 border-[#C89D54]/40 pb-2.5 flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
-                    <h3 className="text-2xl sm:text-3xl font-bold font-serif-editorial text-[#F5F0E6]">
-                      {categoryData.categoryName}
-                    </h3>
-                    <span className="text-xs text-[#C89D54] italic">
-                      {categoryData.tagline}
-                    </span>
+                <div key={catKey} className="space-y-5">
+                  {/* Category Visual Banner */}
+                  <div className="rounded-3xl bg-gradient-to-r from-[#221D19] via-[#1B1714] to-[#161311] border border-white/10 p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      {meta.heroImg && (
+                        <img
+                          src={meta.heroImg}
+                          alt={categoryObj.categoryName}
+                          className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl object-cover border border-white/15 shrink-0"
+                        />
+                      )}
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-[#C89D54] block">
+                          {meta.accent || 'Fresh to Order'}
+                        </span>
+                        <h3 className="font-serif text-2xl font-bold text-[#FAF6EE]">
+                          {categoryObj.categoryName}
+                        </h3>
+                        <p className="text-xs text-[#A59B8F] mt-0.5">{categoryObj.tagline}</p>
+                      </div>
+                    </div>
+                    {categoryObj.note && (
+                      <span className="text-[11px] text-[#D8CFC2] bg-white/[0.05] px-3.5 py-1.5 rounded-full border border-white/10 self-start sm:self-center">
+                        {categoryObj.note}
+                      </span>
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {categoryData.items.filter(i => !i.hidden).map(item => {
-                      const isUnavailable =
-                        !item.inStock ||
-                        (item.isWok && !liveStatus.wokOpen) ||
-                        (item.isSushi && !liveStatus.sushiOpen);
+                  {/* Dish Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredItems.map(item => {
                       const isAdded = addedIds[item.id];
+                      const thumb = DISH_THUMBNAILS[item.id];
+                      const stationClosed =
+                        (item.isSushi && !liveStatus.sushiOpen) ||
+                        (item.isWok && !liveStatus.wokOpen);
+                      const available = item.inStock && !stationClosed;
 
                       return (
                         <div
                           key={item.id}
-                          className={`p-4 sm:p-5 border flex flex-col justify-between transition ${
-                            isUnavailable
-                              ? 'bg-[#181412] border-[#2C2520] opacity-60'
-                              : 'bg-[#1B1714] border-[#332B24] hover:border-[#C89D54]/60'
+                          className={`rounded-2xl p-4 sm:p-5 border transition-all flex items-start justify-between gap-4 ${
+                            available
+                              ? 'bg-[#1D1916]/90 hover:bg-[#231E1A] border-white/8 hover:border-[#C89D54]/40 shadow-sm'
+                              : 'bg-[#171412]/50 border-white/5 opacity-60'
                           }`}
                         >
-                          <div className="space-y-2">
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                {item.badge && (
-                                  <span className="inline-block text-[10px] font-mono-tech uppercase bg-[#253529] text-[#A5D6B5] border border-[#4A7C59]/50 px-2 py-0.5 mb-1">
-                                    {item.badge}
-                                  </span>
-                                )}
-                                <h4 className="text-base font-bold text-white leading-snug">
-                                  {item.name}
-                                </h4>
-                              </div>
-                              <span className="text-base font-bold font-mono-tech text-[#C89D54] shrink-0">
-                                {isUnavailable ? 'SOLD OUT' : item.price}
-                              </span>
+                          {thumb && (
+                            <img
+                              src={thumb}
+                              alt={item.name}
+                              className="w-20 h-20 rounded-2xl object-cover border border-white/10 shrink-0 hidden sm:block"
+                            />
+                          )}
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <h4 className="font-serif text-base sm:text-lg font-bold text-[#FAF6EE]">
+                                {item.name}
+                              </h4>
+                              {item.badge && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-[#C89D54]/15 text-[#E5C17B] text-[10px] font-semibold">
+                                  {item.badge}
+                                </span>
+                              )}
+                              {!available && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-[#9E4734] text-white text-[10px] font-bold">
+                                  Sold Out Today
+                                </span>
+                              )}
                             </div>
 
-                            {item.extraOption && (
-                              <p className="text-[11px] font-mono-tech text-[#C89D54]">
-                                {item.extraOption}
+                            {item.description && (
+                              <p className="text-xs text-[#A89F93] leading-relaxed">
+                                {item.description}
                               </p>
                             )}
-
-                            {item.description && (
-                              <p className="text-xs text-[#A69B8D] leading-relaxed">
-                                {item.description}
+                            {item.extraOption && (
+                              <p className="text-[11px] text-[#C89D54] font-medium mt-1.5">
+                                ✦ {item.extraOption}
                               </p>
                             )}
                           </div>
 
-                          <div className="pt-4 mt-3 border-t border-[#2A231D] flex items-center justify-between">
-                            <span className="text-[11px] text-[#8C8275] font-mono-tech">
-                              {item.isSushi ? '🍣 Hand-Rolled Sushi' : '🔥 Kitchen Scratch'}
+                          <div className="flex flex-col items-end justify-between self-stretch shrink-0">
+                            <span className="font-serif text-base sm:text-lg font-bold text-[#C89D54]">
+                              {item.price}
                             </span>
+
                             <button
+                              disabled={!available}
                               onClick={() => handleAdd(item)}
-                              disabled={isUnavailable}
-                              className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer transition ${
-                                isUnavailable
-                                  ? 'bg-[#25201B] text-[#6E655B] cursor-not-allowed'
+                              className={`mt-3 w-9 h-9 rounded-full flex items-center justify-center transition cursor-pointer ${
+                                !available
+                                  ? 'bg-white/5 text-white/20 cursor-not-allowed'
                                   : isAdded
-                                  ? 'bg-[#2E5A44] text-white'
-                                  : 'bg-[#28211B] hover:bg-[#C89D54] text-[#F5F0E6] hover:text-[#14110F] border border-[#3D332B]'
+                                  ? 'bg-[#4A7C59] text-white scale-105'
+                                  : 'bg-white/10 hover:bg-[#C89D54] text-white hover:text-[#120F0D]'
                               }`}
+                              title={available ? `Add ${item.name}` : 'Currently unavailable'}
                             >
-                              {isAdded ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5" />
-                                  <span>Added</span>
-                                </>
-                              ) : isUnavailable ? (
-                                <span>Unavailable</span>
-                              ) : (
-                                <>
-                                  <Plus className="w-3.5 h-3.5" />
-                                  <span>Add to Order</span>
-                                </>
-                              )}
+                              {isAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
                             </button>
                           </div>
                         </div>
@@ -590,130 +686,356 @@ export default function AngkorSanctuaryLayout() {
         </div>
       </section>
 
-      {/* 6. THE MEANING OF "RICE • ROOTS • ROLLS" & CHEF A'S FAMILY JOURNEY */}
-      <section id="meaning-story" className="py-12 sm:py-16 bg-[#181411] border-b border-[#2E2721]">
-        <div className="max-w-7xl mx-auto px-4 space-y-12">
-          {/* Top 3 Pillars: RICE, ROOTS, ROLLS (With Her Real Photos & Her Young Son!) */}
-          <div className="space-y-6">
-            <div className="text-center max-w-3xl mx-auto space-y-2">
-              <span className="text-xs font-mono-tech uppercase tracking-widest text-[#C89D54] font-bold">
-                Heart, Culture &amp; Family Legacy
-              </span>
-              <h2 className="text-3xl sm:text-5xl font-bold font-serif-editorial text-white">
-                The Meaning Behind Rice, Roots &amp; Rolls
-              </h2>
-              <p className="text-xs sm:text-sm text-[#A69B8D]">
-                Every word in our name carries a piece of Chef A’s heritage, her grandparents’ harvest, and her two young boys.
-              </p>
-            </div>
+      {/* CHEF A'S HERITAGE & THE MEANING OF RICE • ROOTS • ROLLS */}
+      <section id="roots" className="relative z-20 max-w-6xl mx-auto px-4 py-16">
+        <div className="text-center max-w-2xl mx-auto mb-12">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C89D54] block mb-2">
+            From Lander, Wyoming to Spring Lake, North Carolina
+          </span>
+          <h2 className="font-serif text-3xl sm:text-5xl font-bold text-[#FAF6EE]">
+            The Heart Behind Our Name
+          </h2>
+          <p className="text-sm text-[#A89F93] mt-3">
+            Every morning begins with a 45-minute drive, two wonderful young boys, and generations of Cambodian family recipes prepared from scratch.
+          </p>
+        </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {meaningPillars.map(pillar => (
-                <div
-                  key={pillar.id}
-                  className="bg-[#14110F] border-2 border-[#332B24] flex flex-col justify-between overflow-hidden"
-                >
-                  <div>
-                    <div className="h-64 overflow-hidden border-b border-[#2E2721] relative">
-                      <img
-                        src={pillar.image}
-                        alt={pillar.title}
-                        className="w-full h-full object-cover object-center"
-                      />
-                      <div className="absolute top-3 left-3 bg-[#14110F]/90 border border-[#C89D54] px-3 py-1">
-                        <span className="text-lg font-bold font-serif-editorial text-[#C89D54] tracking-widest">
-                          {pillar.title}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="p-5 space-y-2.5">
-                      <span className="text-xs font-mono-tech uppercase text-[#4A7C59] font-bold block">
-                        {pillar.subtitle}
-                      </span>
-                      <p className="text-xs sm:text-sm text-[#E6DEC8] italic font-serif-editorial text-base leading-relaxed">
-                        “{pillar.quote}”
-                      </p>
-                    </div>
-                  </div>
-                  <div className="px-5 py-3 bg-[#1B1714] border-t border-[#2A231D] text-[11px] text-[#C89D54] font-mono-tech">
-                    — Chef A • Rice, Roots &amp; Rolls
+        {/* Three Meaning Pillars — Modern Magazine Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {meaningPillars.map(pillar => (
+            <div
+              key={pillar.id}
+              className="rounded-[2rem] bg-[#181512] border border-white/10 overflow-hidden flex flex-col justify-between shadow-[0_20px_50px_rgba(0,0,0,0.5)] group"
+            >
+              <div>
+                <div className="h-60 overflow-hidden relative">
+                  <img
+                    src={pillar.image}
+                    alt={pillar.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#181512] via-transparent to-transparent" />
+                  <div className="absolute bottom-4 left-6">
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-[#C89D54] block">
+                      {pillar.subtitle}
+                    </span>
+                    <h3 className="font-serif text-3xl font-bold text-white">{pillar.title}</h3>
                   </div>
                 </div>
+                <div className="p-6">
+                  <p className="text-xs sm:text-sm text-[#C6BCB0] leading-relaxed italic">
+                    “{pillar.quote}”
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 pb-5 pt-2 flex items-center justify-between text-[11px] text-[#8E8478]">
+                <span>Chef A (Leakhena Ouk-Hester)</span>
+                <Heart className="w-3.5 h-3.5 text-[#C89D54]" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Chef A & Far East Foodie Story Bento */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center rounded-[2.25rem] bg-gradient-to-br from-[#1D1916] to-[#14110F] border border-white/10 p-6 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.6)]">
+          <div className="lg:col-span-5 grid grid-cols-2 gap-4">
+            <img
+              src="./images/chef-a-food-truck.jpg"
+              alt="Chef A in front of Far East Foodie red food truck"
+              className="rounded-3xl w-full h-64 object-cover border border-white/10 col-span-2 shadow-lg"
+            />
+            <img
+              src="./images/dining-room-interior.jpg"
+              alt="Serene botanical dining room at 1124 N Bragg Blvd"
+              className="rounded-2xl w-full h-36 object-cover border border-white/10"
+            />
+            <img
+              src="./images/story-rolls-son.jpg"
+              alt="Chef A's young son enjoying fresh rolls"
+              className="rounded-2xl w-full h-36 object-cover border border-white/10"
+            />
+          </div>
+
+          <div className="lg:col-span-7 space-y-4 sm:pl-4">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#C89D54]/15 text-[#E5C17B] text-xs font-semibold">
+              <span>Meet Chef A • Leakhena Ouk-Hester</span>
+            </div>
+            <h3 className="font-serif text-2xl sm:text-4xl font-bold text-[#FAF6EE] leading-tight">
+              Started on wheels in Wyoming. Rooted for family in Spring Lake.
+            </h3>
+            <div className="space-y-3 text-xs sm:text-sm text-[#B8AEA2] leading-relaxed">
+              {chefStoryParagraphs.map((para, idx) => (
+                <p key={idx}>{para}</p>
               ))}
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Chef A's Story: From Lander, WY Red Food Truck to Spring Lake, NC */}
-          <div className="bg-[#14110F] border-2 border-[#382F28] p-6 sm:p-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <div className="lg:col-span-5 space-y-3">
-                <img
-                  src="./images/chef-a-food-truck.jpg"
-                  alt="Chef A in front of her red Far East Foodie food truck in Lander, Wyoming"
-                  className="w-full h-80 sm:h-96 object-cover border-2 border-[#C89D54]"
-                />
-                <p className="text-xs text-[#A69B8D] italic text-center">
-                  Chef A in her traditional Cambodian krama headscarf in front of the original Far East Foodie truck in Lander, Wyoming.
+      {/* EFFORTLESS BRAGG BLVD WAYFINDING & HOURS HUB */}
+      <section id="wayfinding" className="relative z-20 max-w-6xl mx-auto px-4 py-12">
+        <div className="rounded-[2.25rem] bg-gradient-to-br from-[#19231C] via-[#151815] to-[#12100E] border border-[#4A7C59]/35 p-6 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.65)]">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div className="lg:col-span-7 space-y-6">
+              <div>
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.2em] text-[#74C69D] mb-2">
+                  <Compass className="w-4 h-4" />
+                  <span>Never Miss Our Turn on N Bragg Blvd</span>
+                </span>
+                <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
+                  1124 N Bragg Blvd, Spring Lake
+                </h2>
+                <p className="text-xs sm:text-sm text-[#B7C4B9] mt-1">
+                  Dedicated front parking • 5 minutes from Fort Bragg gates • Dine-In &amp; Fast Call-Ahead Pickup
                 </p>
               </div>
 
-              <div className="lg:col-span-7 space-y-4">
-                <div className="inline-flex items-center gap-2 bg-[#253529] border border-[#4A7C59] px-3 py-1 text-xs font-mono-tech text-[#A5D6B5]">
-                  <Heart className="w-3.5 h-3.5 text-[#C89D54] fill-[#C89D54]" />
-                  <span>FROM LANDER, WYOMING TO SPRING LAKE, NORTH CAROLINA</span>
-                </div>
-
-                <h3 className="text-2xl sm:text-4xl font-bold font-serif-editorial text-white leading-tight">
-                  A Little Red Food Truck, Two Young Boys, and a Big Family Dream
-                </h3>
-
-                <div className="space-y-3 text-xs sm:text-sm text-[#D5CCC0] leading-relaxed">
-                  {chefStoryParagraphs.map((para, idx) => (
-                    <p key={idx}>{para}</p>
-                  ))}
-                </div>
+              {/* 1-Tap Navigation Pill Buttons */}
+              <div className="flex flex-wrap gap-3">
+                <a
+                  href={businessInfo.appleMapsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-3 rounded-full bg-white text-[#12100E] font-bold text-xs flex items-center gap-2 hover:bg-[#E5C17B] transition shadow-md"
+                >
+                  <Navigation className="w-3.5 h-3.5" />
+                  <span>Open in Apple Maps</span>
+                </a>
+                <a
+                  href={businessInfo.googleMapsDirectionsUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-3 rounded-full bg-[#C89D54] text-[#12100E] font-bold text-xs flex items-center gap-2 hover:bg-[#D7AE66] transition shadow-md"
+                >
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>Google Maps Route</span>
+                </a>
+                <a
+                  href={businessInfo.wazeUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-5 py-3 rounded-full bg-white/10 hover:bg-white/15 text-white border border-white/15 font-semibold text-xs flex items-center gap-2 transition"
+                >
+                  <Car className="w-3.5 h-3.5 text-[#74C69D]" />
+                  <span>Launch Waze</span>
+                </a>
               </div>
+
+              {/* Visual Approach Cues */}
+              <div className="space-y-3 pt-2">
+                {businessInfo.wayfindingLandmarks.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-2xl bg-black/30 border border-white/10 p-4 flex items-start gap-3.5"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-[#4A7C59]/30 border border-[#74C69D]/40 text-[#74C69D] font-bold text-xs flex items-center justify-center shrink-0 mt-0.5">
+                      {idx + 1}
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold text-white">{item.direction}</div>
+                      <p className="text-xs text-[#B5ABA0] mt-1 leading-relaxed">{item.cue}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Column: Live Hours & Direct Contact Card */}
+            <div className="lg:col-span-5 rounded-3xl bg-[#141210]/90 border border-white/10 p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="flex items-center gap-2.5">
+                  <Clock className="w-5 h-5 text-[#C89D54]" />
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-white">Kitchen Hours</h3>
+                    <p className="text-[11px] text-[#9E9488]">{liveStatus.lastUpdated}</p>
+                  </div>
+                </div>
+                <span className="px-3 py-1 rounded-full bg-[#4A7C59]/25 text-[#74C69D] text-[10px] font-bold">
+                  Live Status
+                </span>
+              </div>
+
+              <div className="space-y-3">
+                {businessInfo.hoursSchedule.map((row, i) => (
+                  <div
+                    key={i}
+                    className="flex items-center justify-between text-xs py-2 border-b border-white/5 last:border-none"
+                  >
+                    <span className="text-[#C6BCB0] font-medium">{row.days}</span>
+                    <span className="font-bold text-white">{row.hours}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-2xl bg-[#C89D54]/10 border border-[#C89D54]/30 p-4 text-xs text-[#E5C17B]">
+                <div className="font-bold mb-1">Today’s Live Note from Chef A:</div>
+                <div className="text-[#F5EFE6]">{liveStatus.subtext}</div>
+              </div>
+
+              <a
+                href={`tel:${businessInfo.phoneRaw}`}
+                className="w-full py-3.5 rounded-full bg-[#C89D54] hover:bg-[#D7AE66] text-[#120F0D] font-bold text-xs flex items-center justify-center gap-2 transition shadow-md"
+              >
+                <Phone className="w-4 h-4" />
+                <span>Call Kitchen: {businessInfo.phone}</span>
+              </a>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 7. REAL 5-STAR CUSTOMER REVIEWS */}
-      <section className="py-12 sm:py-16 bg-[#14110F] border-b border-[#2E2721]">
-        <div className="max-w-7xl mx-auto px-4 space-y-8">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-mono-tech uppercase tracking-widest text-[#C89D54] font-bold">
-              5.0 ★ Verified Guest Reviews
+      {/* INTERACTIVE CATERING SHOWCASE & CALCULATOR + 5-STAR REVIEWS */}
+      <section id="catering" className="relative z-20 max-w-6xl mx-auto px-4 py-16 space-y-16">
+        <div className="rounded-[2.25rem] bg-[#181512] border border-white/10 p-6 sm:p-10 shadow-[0_25px_70px_rgba(0,0,0,0.6)]">
+          <div className="max-w-2xl mb-8">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C89D54] block mb-2">
+              Fort Bragg Ceremonies • Office Lunches • Family Celebrations
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold font-serif-editorial text-white">
-              What Spring Lake &amp; Travelers Are Saying
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-white">
+              Roots Catering &amp; Party Trays
+            </h2>
+            <p className="text-xs sm:text-sm text-[#A89F93] mt-2">
+              Select your favorite trays and guest count below to estimate your buffet and text Chef A directly.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {cateringGallery.map(pkg => {
+                const selected = selectedPackages.includes(pkg.id);
+                return (
+                  <div
+                    key={pkg.id}
+                    onClick={() => togglePackage(pkg.id)}
+                    className={`rounded-3xl overflow-hidden border transition cursor-pointer flex flex-col justify-between ${
+                      selected
+                        ? 'bg-[#241E19] border-[#C89D54] shadow-lg'
+                        : 'bg-[#14110F] border-white/10 opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <div>
+                      <div className="h-40 relative overflow-hidden">
+                        <img src={pkg.image} alt={pkg.title} className="w-full h-full object-cover" />
+                        <span className="absolute top-3 right-3 px-3 py-1 rounded-full bg-black/75 text-[#E5C17B] text-xs font-bold">
+                          ${pkg.pricePerPerson.toFixed(2)} / guest
+                        </span>
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-serif text-base font-bold text-white">{pkg.title}</h3>
+                        <p className="text-xs text-[#A59B8F] mt-1">{pkg.subtitle}</p>
+                      </div>
+                    </div>
+                    <div className="px-4 pb-4">
+                      <div
+                        className={`w-full py-2 rounded-full text-xs font-bold text-center ${
+                          selected
+                            ? 'bg-[#C89D54] text-[#120F0D]'
+                            : 'bg-white/10 text-white/75'
+                        }`}
+                      >
+                        {selected ? '✓ Included in Estimate' : '+ Select Platter'}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <form
+              onSubmit={handleSendCateringSms}
+              className="lg:col-span-5 rounded-3xl bg-[#120F0D] border border-white/10 p-6 flex flex-col justify-between space-y-5"
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#C89D54]">
+                    Instant Event Estimator
+                  </span>
+                  <span className="font-serif text-2xl font-bold text-white">
+                    ~${estimatedCateringTotal.toFixed(0)}
+                  </span>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs mb-1.5">
+                    <span className="text-[#C6BCB0]">Estimated Guests:</span>
+                    <span className="font-bold text-[#E5C17B]">{guestCount} Guests</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="150"
+                    step="5"
+                    value={guestCount}
+                    onChange={e => setGuestCount(Number(e.target.value))}
+                    className="w-full accent-[#C89D54] cursor-pointer"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <input
+                    type="text"
+                    placeholder="Your Name or Unit"
+                    value={cateringName}
+                    onChange={e => setCateringName(e.target.value)}
+                    className="px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-xs text-white placeholder-[#7D746B]"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Event Date & Time"
+                    value={cateringDate}
+                    onChange={e => setCateringDate(e.target.value)}
+                    className="px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-xs text-white placeholder-[#7D746B]"
+                  />
+                </div>
+
+                <textarea
+                  rows="2"
+                  placeholder="Any dietary notes, spice preferences, or delivery details?"
+                  value={cateringNotes}
+                  onChange={e => setCateringNotes(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-2xl bg-white/[0.06] border border-white/10 text-xs text-white placeholder-[#7D746B]"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3.5 rounded-full bg-[#C89D54] hover:bg-[#D7AE66] text-[#120F0D] font-bold text-xs transition cursor-pointer shadow-lg"
+              >
+                Send Catering Inquiry to Chef A via Text
+              </button>
+            </form>
+          </div>
+        </div>
+
+        {/* 5-Star Guest Reviews */}
+        <div className="space-y-6">
+          <div className="text-center">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C89D54]">
+              Verified Spring Lake &amp; Fort Bragg Guests
+            </span>
+            <h2 className="font-serif text-3xl font-bold text-white mt-1">
+              Why Neighbors Love Rice, Roots &amp; Rolls
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             {customerReviews.map(rev => (
               <div
                 key={rev.id}
-                className="bg-[#1B1714] border border-[#332B24] p-5 sm:p-6 flex flex-col justify-between space-y-4"
+                className="rounded-3xl bg-[#181512] border border-white/10 p-5 flex flex-col justify-between"
               >
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-[#C89D54]">
-                      {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} className="w-4 h-4 fill-[#C89D54]" />
-                      ))}
-                    </div>
-                    <span className="text-[11px] font-mono-tech text-[#8C8275]">{rev.date}</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-1 text-[#C89D54]">
+                    {[...Array(rev.rating)].map((_, idx) => (
+                      <Star key={idx} className="w-3.5 h-3.5 fill-current" />
+                    ))}
                   </div>
-                  <h4 className="text-sm font-bold text-[#C89D54]">{rev.highlight}</h4>
-                  <p className="text-xs sm:text-sm text-[#E6DEC8] leading-relaxed italic">
-                    “{rev.quote}”
-                  </p>
+                  <div className="text-xs font-bold text-[#E5C17B]">{rev.highlight}</div>
+                  <p className="text-xs text-[#C6BCB0] leading-relaxed">“{rev.quote}”</p>
                 </div>
-
-                <div className="pt-3 border-t border-[#2A231D] flex items-center justify-between text-xs">
-                  <strong className="text-white">{rev.author}</strong>
-                  <span className="text-[#A69B8D] font-mono-tech">{rev.location}</span>
+                <div className="pt-4 mt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-[#8E8478]">
+                  <span className="font-bold text-white">{rev.author}</span>
+                  <span>{rev.location}</span>
                 </div>
               </div>
             ))}
@@ -721,201 +1043,32 @@ export default function AngkorSanctuaryLayout() {
         </div>
       </section>
 
-      {/* 8. CATERING GALLERY & INTERACTIVE FORT BRAGG / EVENT ESTIMATOR */}
-      <section id="catering-section" className="py-12 sm:py-16 bg-[#181411] border-b border-[#2E2721]">
-        <div className="max-w-7xl mx-auto px-4 space-y-10">
-          <div className="text-center max-w-3xl mx-auto space-y-2">
-            <span className="text-xs font-mono-tech uppercase tracking-widest text-[#C89D54] font-bold">
-              Roots Catering • Fort Bragg Ceremonies, Office Lunches &amp; Family Celebrations
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-bold font-serif-editorial text-white">
-              Bring Chef A’s Catering Platters to Your Next Gathering
-            </h2>
-            <p className="text-xs sm:text-sm text-[#A69B8D]">
-              From crispy Khmer Pork Egg Roll party wheels to full hot chafing buffets and hand-rolled sushi platters.
-            </p>
-          </div>
-
-          {/* Real Catering Photography Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {cateringGallery.map(item => (
-              <div key={item.id} className="bg-[#14110F] border border-[#332B24] overflow-hidden">
-                <img src={item.image} alt={item.title} className="w-full h-48 object-cover" />
-                <div className="p-4 space-y-1">
-                  <div className="flex items-baseline justify-between gap-2">
-                    <h4 className="text-sm font-bold text-white">{item.title}</h4>
-                    <span className="text-xs font-mono-tech text-[#C89D54] shrink-0">
-                      ~${item.pricePerPerson.toFixed(2)}/guest
-                    </span>
-                  </div>
-                  <p className="text-xs text-[#A69B8D]">{item.subtitle}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Interactive Catering Calculator */}
-          <form
-            onSubmit={handleSendCateringSms}
-            className="bg-[#14110F] border-2 border-[#C89D54]/60 p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center"
-          >
-            <div className="lg:col-span-7 space-y-5">
-              <h3 className="text-2xl font-bold font-serif-editorial text-white">
-                Interactive Event &amp; Platter Estimator
-              </h3>
-
-              <div>
-                <div className="flex justify-between text-xs font-bold mb-2">
-                  <span className="text-[#D5CCC0] uppercase">Estimated Guest Count:</span>
-                  <span className="text-[#C89D54] font-mono-tech text-base">{guestCount} Guests</span>
-                </div>
-                <input
-                  type="range"
-                  min="10"
-                  max="150"
-                  step="5"
-                  value={guestCount}
-                  onChange={e => setGuestCount(Number(e.target.value))}
-                  className="w-full accent-[#C89D54] cursor-pointer"
-                />
-                <div className="flex justify-between text-[10px] font-mono-tech text-[#8C8275] mt-1">
-                  <span>10 Guests (Small Team)</span>
-                  <span>50 Guests (Unit / Party)</span>
-                  <span>150 Guests (Banquet)</span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase text-[#D5CCC0]">
-                  Select Platters &amp; Trays to Include:
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {cateringGallery.map(pkg => {
-                    const selected = selectedPackages.includes(pkg.id);
-                    return (
-                      <button
-                        type="button"
-                        key={pkg.id}
-                        onClick={() => togglePackage(pkg.id)}
-                        className={`p-3 border text-left text-xs transition cursor-pointer flex items-center justify-between ${
-                          selected
-                            ? 'bg-[#253529] border-[#4A7C59] text-white font-bold'
-                            : 'bg-[#1C1815] border-[#332B24] text-[#A69B8D]'
-                        }`}
-                      >
-                        <span>{pkg.title}</span>
-                        <span className="font-mono-tech text-[#C89D54]">+${pkg.pricePerPerson.toFixed(2)}/pp</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input
-                  type="text"
-                  placeholder="Your Name or Organization"
-                  value={cateringName}
-                  onChange={e => setCateringName(e.target.value)}
-                  className="bg-[#1C1815] border border-[#382F28] px-3 py-2.5 text-xs text-white"
-                />
-                <input
-                  type="text"
-                  placeholder="Event Date & Time"
-                  value={cateringDate}
-                  onChange={e => setCateringDate(e.target.value)}
-                  className="bg-[#1C1815] border border-[#382F28] px-3 py-2.5 text-xs text-white"
-                />
-              </div>
-            </div>
-
-            <div className="lg:col-span-5 bg-[#1B1714] border border-[#382F28] p-6 space-y-4 text-center">
-              <span className="text-xs font-mono-tech uppercase text-[#C89D54] block font-bold">
-                Instant Catering Estimate
-              </span>
-              <div className="text-4xl font-bold font-mono-tech text-white">
-                ~${estimatedCateringTotal.toFixed(0)}
-              </div>
-              <p className="text-xs text-[#A69B8D]">
-                Estimated for <strong>{guestCount} guests</strong> ({selectedPackages.length} platter tiers selected). Custom sushi platters &amp; whole trays tailored to your budget!
-              </p>
-              <button
-                type="submit"
-                className="w-full py-3 bg-[#C89D54] hover:bg-[#D6AD65] text-[#14110F] font-extrabold text-xs uppercase tracking-wider cursor-pointer shadow"
-              >
-                Text Catering Inquiry to Chef A
-              </button>
-              <a
-                href={`tel:${businessInfo.phoneRaw}`}
-                className="block text-xs text-[#C89D54] hover:underline font-mono-tech"
-              >
-                Or Call Directly: {businessInfo.phone}
-              </a>
-            </div>
-          </form>
-        </div>
-      </section>
-
-      {/* 9. FOOTER */}
-      <footer className="bg-[#0F0C0A] text-[#A69B8D] py-12 px-4 text-xs border-t border-[#2C2520]">
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 pb-8 border-b border-[#241E1A]">
-          <div className="space-y-2">
-            <h4 className="text-xl font-bold font-serif-editorial text-[#F5F0E6]">
+      {/* MODERN LUXURY FOOTER */}
+      <footer className="relative z-20 border-t border-white/10 bg-[#0B0908] py-12 px-4 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-[#8E8478]">
+          <div>
+            <div className="font-serif text-lg font-bold text-white">
               Rice, Roots &amp; Rolls — An Asian Kitchen
-            </h4>
-            <p className="text-xs text-[#A69B8D]">
-              Authentic Cambodian comfort food, timeless Chinese specials, and hand-rolled sushi crafted with love by Chef A.
-            </p>
-            <p className="text-xs text-[#C89D54] font-mono-tech pt-1">
-              📍 {businessInfo.address}
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <h5 className="font-bold text-white uppercase tracking-wider text-xs mb-2">
-              Hours of Operation
-            </h5>
-            {businessInfo.hoursSchedule.map((h, i) => (
-              <div key={i} className="flex justify-between max-w-xs">
-                <span>{h.days}:</span>
-                <span className="font-mono-tech text-[#E6DEC8]">{h.hours}</span>
-              </div>
-            ))}
-          </div>
-
-          <div className="space-y-2">
-            <h5 className="font-bold text-white uppercase tracking-wider text-xs mb-2">
-              Chef &amp; Platform Tools
-            </h5>
-            <div className="flex flex-col gap-1.5 items-start">
-              <button
-                onClick={() => setIsChefAdminOpen(true)}
-                className="text-[#C89D54] hover:underline cursor-pointer flex items-center gap-1.5"
-              >
-                <ChefHat className="w-3.5 h-3.5" />
-                <span>Chef A iPhone Pocket Admin (On-the-Fly Edit)</span>
-              </button>
-              <button
-                onClick={() => setIsSchemaWhitePageOpen(true)}
-                className="text-[#A5D6B5] hover:underline cursor-pointer flex items-center gap-1.5"
-              >
-                <SearchCode className="w-3.5 h-3.5" />
-                <span>Schema.org Discovery &amp; Google Maps Sync White Paper</span>
-              </button>
-              <button
-                onClick={() => setIsPrintableMenuOpen(true)}
-                className="text-[#E6DEC8] hover:underline cursor-pointer flex items-center gap-1.5"
-              >
-                <FileImage className="w-3.5 h-3.5" />
-                <span>Download Printable Main &amp; Sushi Menus</span>
-              </button>
+            </div>
+            <div className="mt-1">
+              {businessInfo.address} • {businessInfo.phone}
             </div>
           </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto pt-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-[#6E655B]">
-          <span>© {new Date().getFullYear()} Rice, Roots &amp; Rolls. All rights reserved.</span>
-          <span>1124 N Bragg Blvd, Spring Lake, NC 28390 • {businessInfo.phone}</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              onClick={() => setIsChefAdminOpen(true)}
+              className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-[#E5C17B] font-semibold cursor-pointer"
+            >
+              Chef A Pocket Admin
+            </button>
+            <button
+              onClick={() => setIsSchemaWhitePageOpen(true)}
+              className="px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 text-[#C6BCB0] cursor-pointer"
+            >
+              Google Maps &amp; SEO Architecture
+            </button>
+          </div>
         </div>
       </footer>
     </div>

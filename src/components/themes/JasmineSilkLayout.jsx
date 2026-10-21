@@ -6,15 +6,35 @@ import {
   Clock,
   Navigation,
   Heart,
+  Sparkles,
   Check,
   Plus,
   Search,
   Star,
+  Utensils,
   FileImage,
-  ChefHat,
-  SearchCode,
-  Car
+  Compass,
+  Car,
+  ArrowUpRight
 } from 'lucide-react';
+
+const DISH_THUMBNAILS = {
+  se_kathiew: './images/hero-khmer-beef.png',
+  se_bai_saik_chruk: './images/hero-khmer-beef.png',
+  se_noodle_bowl: './images/catering-egg-rolls.jpg',
+  sq_wyoming_cowboy: './images/specialty-sushi-closeup.jpg',
+  sq_screaming_eagle: './images/rainbow-roll-cutout.png',
+  sq_24th_id: './images/specialty-sushi-closeup.jpg',
+  sq_all_american: './images/rainbow-roll-cutout.png',
+  ss_khmer_crudo: './images/khmer-crudo.jpg',
+  ss_tempura_battered: './images/shrimp-tempura.jpg',
+  cr_rainbow: './images/rainbow-roll-cutout.png',
+  cr_dragon: './images/specialty-sushi-closeup.jpg',
+  cr_shrimp_tempura: './images/shrimp-tempura.jpg',
+  st_egg_rolls: './images/catering-egg-rolls.jpg',
+  st_shrimp_tempura: './images/shrimp-tempura.jpg',
+  ch_sesame_chicken: './images/catering-buffet.jpg'
+};
 
 export default function JasmineSilkLayout() {
   const {
@@ -32,390 +52,536 @@ export default function JasmineSilkLayout() {
     setIsSchemaWhitePageOpen
   } = useKitchen();
 
-  const [activeCategory, setActiveCategory] = useState('southeastSpecials');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [addedIds, setAddedIds] = useState({});
 
   const handleAdd = (item) => {
     addToCart(item);
     setAddedIds(prev => ({ ...prev, [item.id]: true }));
-    setTimeout(() => setAddedIds(prev => ({ ...prev, [item.id]: false })), 1400);
+    setTimeout(() => setAddedIds(prev => ({ ...prev, [item.id]: false })), 1300);
   };
 
   const categories = [
-    { key: 'southeastSpecials', label: 'Southeast & Khmer Specials' },
-    { key: 'chefsSpecials', label: "Chef's Khmer Specials" },
-    { key: 'squadLeaderSushi', label: 'Squad Leader Specialty Sushi' },
-    { key: 'sushiStartersAndStandard', label: 'Sushi Starters & Rolls' },
-    { key: 'chineseSpecials', label: 'Chinese Specials' },
-    { key: 'appetizersAndDrinks', label: 'Appetizers & Drinks' },
-    { key: 'all', label: 'View All 36 Dishes' }
+    { key: 'all', label: 'Complete Menu (36)' },
+    { key: 'southeastSpecials', label: 'Khmer Specials' },
+    { key: 'chefsSpecials', label: "Chef's Traditions" },
+    { key: 'squadLeaderSushi', label: 'Squad Leader Rolls' },
+    { key: 'sushiStarters', label: 'Crudo & Sushi Apps' },
+    { key: 'classicRolls', label: 'Classic Rolls' },
+    { key: 'startersAndSides', label: 'Crispy Starters' },
+    { key: 'soups', label: 'Soups' },
+    { key: 'chineseFavorites', label: 'Wok Classics' }
   ];
 
-  const getDisplayedItems = () => {
-    let list = [];
-    if (activeCategory === 'all') {
-      Object.values(menu).forEach(cat => {
-        cat.items.filter(i => !i.hidden).forEach(i => list.push({ ...i, catName: cat.categoryName }));
-      });
-    } else {
-      const cat = menu[activeCategory];
-      if (cat) {
-        cat.items.filter(i => !i.hidden).forEach(i => list.push({ ...i, catName: cat.categoryName }));
-      }
-    }
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      list = list.filter(
-        i =>
-          i.name.toLowerCase().includes(q) ||
-          (i.description && i.description.toLowerCase().includes(q))
-      );
-    }
-    return list;
-  };
+  const visibleSpecials = specials.filter(s => !s.hidden);
 
   return (
-    <div className="bg-[#FAF6EE] text-[#231F1C] w-full max-w-full overflow-x-hidden">
-      {/* 1. Warm Heritage Welcome Banner */}
-      <div className="bg-[#231F1C] text-[#F5F0E6] py-2 px-3 text-xs border-b border-[#3D352E]">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+    <div className="min-h-screen bg-[#FAF7F2] text-[#1C1815] selection:bg-[#9E4734] selection:text-white overflow-x-hidden">
+      {/* Live Status Sunlit Pill Banner */}
+      <div className="pt-3 px-4">
+        <div className="max-w-6xl mx-auto rounded-full bg-[#EFEAE1] border border-[#E2D9C8] px-5 py-2 flex flex-wrap items-center justify-between gap-2 text-xs text-[#3D352E]">
           <div className="flex items-center gap-2">
-            <span className="bg-[#8C3B2B] text-white text-[10px] font-extrabold uppercase px-2 py-0.5 font-mono-tech">
-              {liveStatus.badgeText}
-            </span>
-            <span className="text-[#E6DEC8]">{liveStatus.topMarquee}</span>
+            <span className="w-2 h-2 rounded-full bg-[#3A5A40] animate-ping" />
+            <span className="font-bold text-[#1C1815]">{liveStatus.badgeText}</span>
+            <span className="hidden md:inline text-[#6E6358]">• {liveStatus.headline}</span>
           </div>
-          <div className="flex items-center gap-3 font-mono-tech text-[11px]">
-            <a href={`tel:${businessInfo.phoneRaw}`} className="text-[#E5C17B] font-bold hover:underline">
-              {businessInfo.phone}
-            </a>
-            <span>•</span>
-            <span>1124 N Bragg Blvd, Spring Lake</span>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline text-[#6E6358]">{liveStatus.customHoursToday}</span>
+            <button
+              onClick={() => setIsChefAdminOpen(true)}
+              className="font-semibold text-[#9E4734] hover:underline cursor-pointer"
+            >
+              Chef A Live Hours
+            </button>
           </div>
         </div>
       </div>
 
-      {/* 2. Sunlit Editorial Header */}
-      <header className="bg-[#FFFFFF] border-b border-[#E2D9C5] py-5 px-4 shadow-xs">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-center md:text-left">
-            <img
-              src="./images/chef-a-food-truck.jpg"
-              alt="Chef A"
-              className="w-16 h-16 sm:w-20 sm:h-20 object-cover border-2 border-[#8C3B2B]"
-            />
-            <div>
-              <span className="text-[#8C3B2B] text-xs font-extrabold uppercase tracking-widest block font-mono-tech">
-                Chef A’s Family Kitchen &amp; Sushi Bar
-              </span>
-              <h1 className="text-3xl sm:text-5xl font-bold text-[#14110F] font-serif-editorial tracking-tight leading-none mt-0.5">
-                Rice, Roots &amp; Rolls
-              </h1>
-              <p className="text-xs sm:text-sm text-[#5C5349] mt-1 italic font-serif-editorial">
-                “From a little red food truck in Lander, Wyoming to our family table in Spring Lake, NC.”
-              </p>
+      {/* Floating Sunlit Alabaster Header Pill */}
+      <header className="sticky top-3 z-40 px-4 mt-3">
+        <div className="max-w-6xl mx-auto rounded-full bg-white/85 backdrop-blur-2xl border border-[#E6DEC8] px-6 py-3.5 shadow-[0_15px_40px_rgba(28,24,21,0.06)] flex items-center justify-between gap-4">
+          <a href="#top" className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#9E4734] text-white flex items-center justify-center font-serif font-bold text-lg shadow-sm">
+              R
             </div>
-          </div>
+            <div>
+              <span className="font-serif text-xl font-bold tracking-tight text-[#1C1815] block leading-none">
+                Rice, Roots &amp; Rolls
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.22em] text-[#9E4734] font-semibold block mt-1">
+                An Asian Kitchen • Spring Lake, NC
+              </span>
+            </div>
+          </a>
 
-          <div className="flex items-center flex-wrap justify-center gap-2">
-            <a
-              href="#jasmine-menu"
-              className="px-4 py-2.5 bg-[#FAF6EE] hover:bg-[#EFE7D6] border border-[#D8CEB8] text-[#231F1C] font-bold text-xs uppercase tracking-wider"
-            >
-              Explore Menu
+          <nav className="hidden lg:flex items-center gap-1 bg-[#F4EFE6] rounded-full p-1 text-xs font-medium text-[#5C5248]">
+            <a href="#signatures" className="px-4 py-2 rounded-full hover:bg-white hover:text-[#1C1815] transition">
+              Signatures
             </a>
-            <a
-              href="#jasmine-wayfinding"
-              className="px-4 py-2.5 bg-[#FAF6EE] hover:bg-[#EFE7D6] border border-[#D8CEB8] text-[#2E5A44] font-bold text-xs uppercase tracking-wider flex items-center gap-1"
-            >
-              <Navigation className="w-3.5 h-3.5" />
-              <span>1124 N Bragg Blvd</span>
+            <a href="#menu" className="px-4 py-2 rounded-full hover:bg-white hover:text-[#1C1815] transition">
+              Full Menu
             </a>
+            <a href="#atelier-story" className="px-4 py-2 rounded-full hover:bg-white hover:text-[#1C1815] transition">
+              Our Story
+            </a>
+            <a href="#visit" className="px-4 py-2 rounded-full hover:bg-white hover:text-[#1C1815] transition">
+              Find Us on Bragg Blvd
+            </a>
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPrintableMenuOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#F4EFE6] hover:bg-[#EAE2D3] text-[#1C1815] text-xs font-semibold transition cursor-pointer"
+            >
+              <FileImage className="w-3.5 h-3.5 text-[#9E4734]" />
+              <span>Menu Boards</span>
+            </button>
             <a
               href={`tel:${businessInfo.phoneRaw}`}
-              className="px-4 py-2.5 bg-[#8C3B2B] hover:bg-[#732F22] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full bg-[#9E4734] hover:bg-[#873B2B] text-white font-bold text-xs shadow-md shadow-[#9E4734]/20 transition"
             >
               <Phone className="w-3.5 h-3.5" />
-              <span>Call {businessInfo.phone}</span>
+              <span>{businessInfo.phone}</span>
             </a>
           </div>
         </div>
       </header>
 
-      {/* 3. Hero: The 3 Meaning Cards (RICE • ROOTS • ROLLS) Front & Center */}
-      <section className="py-10 sm:py-14 px-4 max-w-7xl mx-auto space-y-10">
-        <div className="bg-white border border-[#E2D9C5] p-6 sm:p-10 shadow-xs">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            <div className="lg:col-span-7 space-y-4">
-              <div className="inline-flex items-center gap-1.5 bg-[#F5EBE6] border border-[#D9B8AE] text-[#8C3B2B] px-3 py-1 text-xs font-mono-tech font-bold uppercase">
-                <Heart className="w-3.5 h-3.5 fill-[#8C3B2B]" />
-                <span>Fresh Ingredients • Family Recipes • Cultured Spirit</span>
-              </div>
-
-              <h2 className="text-3xl sm:text-5xl font-bold text-[#14110F] font-serif-editorial leading-tight">
-                Every Grain Tells a Story. <br />
-                <span className="text-[#8C3B2B] italic">Every Roll is Made with Love.</span>
-              </h2>
-
-              <p className="text-sm sm:text-base text-[#3D352E] leading-relaxed">
-                {chefStoryParagraphs[1]} {chefStoryParagraphs[2]}
-              </p>
-
-              <div className="bg-[#FAF6EE] border-l-4 border-[#2E5A44] p-4 space-y-1">
-                <div className="text-xs font-mono-tech uppercase text-[#2E5A44] font-bold">
-                  {liveStatus.badgeText} • Today: {liveStatus.customHoursToday}
-                </div>
-                <p className="text-xs text-[#3D352E]">{liveStatus.headline}</p>
-              </div>
-
-              <div className="flex flex-wrap gap-3 pt-1">
-                <a
-                  href={businessInfo.googleMapsShortUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-5 py-3 bg-[#2E5A44] hover:bg-[#234735] text-white font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow"
-                >
-                  <Navigation className="w-4 h-4" />
-                  <span>Google Maps Directions</span>
-                </a>
-                <a
-                  href={businessInfo.appleMapsUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="px-4 py-3 bg-[#FAF6EE] hover:bg-[#EFE7D6] border border-[#D8CEB8] text-[#231F1C] font-bold text-xs uppercase tracking-wider flex items-center gap-1.5"
-                >
-                  <MapPin className="w-4 h-4 text-[#8C3B2B]" />
-                  <span>iPhone Apple Maps</span>
-                </a>
-              </div>
+      {/* KINFOLK MAGAZINE EDITORIAL HERO */}
+      <section id="top" className="max-w-6xl mx-auto px-4 pt-10 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-6 space-y-6">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#F2ECE1] text-[#9E4734] text-xs font-semibold tracking-wide">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Fresh Ingredients • Family Recipes • 1124 N Bragg Blvd</span>
             </div>
 
-            <div className="lg:col-span-5">
-              <div className="bg-[#FAF6EE] border-2 border-[#D8CEB8] p-3 space-y-2">
-                <img
-                  src="./images/dining-room-interior.jpg"
-                  alt="Rice, Roots & Rolls Dining Room"
-                  className="w-full h-64 sm:h-72 object-cover border border-[#E2D9C5]"
-                />
-                <p className="text-xs text-[#5C5349] italic font-serif-editorial text-center text-sm">
-                  Our serene botanical dining room at 1124 N Bragg Blvd in Spring Lake, NC.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+            <h1 className="font-serif text-5xl sm:text-6xl font-bold text-[#1C1815] leading-[1.04] tracking-tight">
+              Warm jasmine rice,{' '}
+              <span className="italic font-normal text-[#9E4734]">Khmer heritage</span> &amp; hand-rolled sushi.
+            </h1>
 
-        {/* The 3 Story Cards: Rice, Roots, Rolls */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {meaningPillars.map(pillar => (
-            <div key={pillar.id} className="bg-white border border-[#E2D9C5] shadow-xs flex flex-col justify-between">
-              <div>
-                <img src={pillar.image} alt={pillar.title} className="w-full h-60 object-cover border-b border-[#E2D9C5]" />
-                <div className="p-5 space-y-2">
-                  <div className="flex items-baseline justify-between">
-                    <h3 className="text-2xl font-bold font-serif-editorial text-[#8C3B2B] tracking-wide">
-                      {pillar.title}
-                    </h3>
-                    <span className="text-[11px] font-mono-tech uppercase text-[#2E5A44] font-bold">
-                      {pillar.subtitle}
-                    </span>
-                  </div>
-                  <p className="text-xs sm:text-sm text-[#3D352E] leading-relaxed italic font-serif-editorial text-base">
-                    “{pillar.quote}”
-                  </p>
-                </div>
-              </div>
-              <div className="px-5 py-3 bg-[#FAF6EE] border-t border-[#E2D9C5] text-[11px] font-mono-tech text-[#5C5349]">
-                Chef A’s Heritage • Spring Lake, NC
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            <p className="text-[#5C5248] text-base sm:text-lg leading-relaxed">
+              {businessInfo.heroDescription} From our humble beginnings in Lander, Wyoming’s <em className="text-[#1C1815]">Far East Foodie</em> truck to our serene botanical dining room in Spring Lake, NC.
+            </p>
 
-      {/* 4. Wayfinding Banner */}
-      <section id="jasmine-wayfinding" className="py-6 px-4 max-w-7xl mx-auto">
-        <div className="bg-[#231F1C] text-[#F5F0E6] p-6 sm:p-8 border-2 border-[#C89D54]">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#3D352E] pb-4 mb-5">
-            <div>
-              <span className="text-xs font-mono-tech uppercase text-[#C89D54] font-bold flex items-center gap-1.5">
-                <Car className="w-4 h-4" />
-                <span>Easy Turn-In Guide • 1124 N Bragg Blvd, Spring Lake, NC 28390</span>
-              </span>
-              <h3 className="text-2xl sm:text-3xl font-bold font-serif-editorial text-white mt-0.5">
-                How to Spot Our Storefront on N Bragg Blvd
-              </h3>
-            </div>
-            <a
-              href={businessInfo.googleMapsShortUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2.5 bg-[#C89D54] text-[#14110F] font-extrabold text-xs uppercase tracking-wider shrink-0 text-center"
-            >
-              Launch Turn-by-Turn GPS
-            </a>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-            {businessInfo.wayfindingLandmarks.map((lm, i) => (
-              <div key={i} className="bg-[#181512] border border-[#3D352E] p-4 space-y-1">
-                <strong className="text-[#C89D54] block font-mono-tech uppercase">{lm.direction}</strong>
-                <p className="text-[#D5CCC0]">{lm.cue}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Warm Rice-Paper Menu Section */}
-      <section id="jasmine-menu" className="py-12 px-4 max-w-7xl mx-auto space-y-8">
-        <div className="text-center max-w-2xl mx-auto space-y-2">
-          <span className="text-[#8C3B2B] text-xs font-mono-tech font-bold uppercase tracking-widest block">
-            The Family Kitchen &amp; Sushi Menu
-          </span>
-          <h2 className="text-3xl sm:text-5xl font-bold text-[#14110F] font-serif-editorial">
-            Explore Our Dishes &amp; Hand-Rolled Sushi
-          </h2>
-          <button
-            onClick={() => setIsPrintableMenuOpen(true)}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#2E5A44] hover:underline cursor-pointer"
-          >
-            <FileImage className="w-4 h-4" />
-            <span>View Original Printable Menu Boards</span>
-          </button>
-        </div>
-
-        {/* Search + Category Tabs */}
-        <div className="space-y-4">
-          <div className="max-w-md mx-auto relative">
-            <Search className="w-4 h-4 text-[#8C8275] absolute left-3.5 top-3" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search dishes or sushi rolls..."
-              className="w-full bg-white border border-[#D8CEB8] pl-10 pr-4 py-2.5 text-xs sm:text-sm text-[#231F1C]"
-            />
-          </div>
-
-          <div className="flex items-center justify-start md:justify-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {categories.map(cat => (
-              <button
-                key={cat.key}
-                onClick={() => setActiveCategory(cat.key)}
-                className={`px-4 py-2 rounded-none text-xs font-bold transition cursor-pointer border whitespace-nowrap shrink-0 ${
-                  activeCategory === cat.key
-                    ? 'bg-[#8C3B2B] text-white border-[#8C3B2B]'
-                    : 'bg-white text-[#3D352E] hover:bg-[#F3EDE0] border-[#E2D9C5]'
-                }`}
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <a
+                href="#menu"
+                className="px-7 py-3.5 rounded-full bg-[#1C1815] hover:bg-[#9E4734] text-white font-bold text-sm transition shadow-lg inline-flex items-center gap-2"
               >
-                {cat.label}
-              </button>
-            ))}
+                <Utensils className="w-4 h-4" />
+                <span>Browse Full Menu (36 Dishes)</span>
+              </a>
+              <a
+                href={businessInfo.googleMapsDirectionsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-6 py-3.5 rounded-full bg-white hover:bg-[#F2ECE1] border border-[#E2D9C8] text-[#1C1815] font-semibold text-sm transition inline-flex items-center gap-2 shadow-xs"
+              >
+                <Navigation className="w-4 h-4 text-[#9E4734]" />
+                <span>Directions to 1124 N Bragg Blvd</span>
+              </a>
+            </div>
+          </div>
+
+          {/* Right Editorial Photo & Cutout Collage */}
+          <div className="lg:col-span-6 grid grid-cols-12 gap-4 items-center">
+            <div className="col-span-7 rounded-[2rem] bg-white p-4 shadow-[0_25px_60px_rgba(28,24,21,0.08)] border border-[#EFE8DC]">
+              <img
+                src="./images/dining-room-interior.jpg"
+                alt="Serene botanical dining room at Rice, Roots & Rolls"
+                className="w-full h-72 sm:h-80 object-cover rounded-3xl"
+              />
+              <div className="pt-3 px-2 flex items-center justify-between">
+                <div>
+                  <div className="font-serif text-base font-bold text-[#1C1815]">
+                    Our Spring Lake Sanctuary
+                  </div>
+                  <div className="text-xs text-[#786D61]">1124 N Bragg Blvd • Dine-In &amp; Takeout</div>
+                </div>
+                <span className="text-xs font-bold text-[#3A5A40] bg-[#E8F0E8] px-3 py-1 rounded-full">
+                  5.0 ★
+                </span>
+              </div>
+            </div>
+
+            <div className="col-span-5 space-y-4">
+              <div className="rounded-3xl bg-[#F2ECE1] p-4 text-center shadow-sm">
+                <img
+                  src="./images/khmer-crudo-cutout.png"
+                  alt="Khmer Salmon Crudo"
+                  className="w-32 h-32 object-contain mx-auto drop-shadow-xl"
+                />
+                <div className="font-serif text-sm font-bold text-[#1C1815] mt-2">Khmer Crudo</div>
+                <div className="text-[11px] text-[#9E4734] font-semibold">$13.50</div>
+              </div>
+
+              <div className="rounded-3xl bg-white p-4 text-center shadow-[0_15px_35px_rgba(28,24,21,0.06)] border border-[#EFE8DC]">
+                <img
+                  src="./images/rainbow-roll-cutout.png"
+                  alt="Rainbow Sushi Roll"
+                  className="w-32 h-28 object-contain mx-auto drop-shadow-xl"
+                />
+                <div className="font-serif text-sm font-bold text-[#1C1815] mt-2">Fresh Sushi Bar</div>
+                <div className="text-[11px] text-[#6E6358]">Rolled to Order</div>
+              </div>
+            </div>
           </div>
         </div>
+      </section>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {getDisplayedItems().map(item => {
-            const isUnavailable =
-              !item.inStock ||
-              (item.isWok && !liveStatus.wokOpen) ||
-              (item.isSushi && !liveStatus.sushiOpen);
+      {/* SUNLIT SIGNATURE DISH GALLERY */}
+      <section id="signatures" className="max-w-6xl mx-auto px-4 py-12">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+          <div>
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#9E4734] block mb-1.5">
+              Chef A’s Curated Table
+            </span>
+            <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#1C1815]">
+              House Signatures &amp; Local Favorites
+            </h2>
+          </div>
+          <p className="text-xs sm:text-sm text-[#6E6358] max-w-md">
+            Prepared from scratch with fresh lemongrass kreung, house-pickled vegetables, and sashimi-grade fish.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {visibleSpecials.map(item => {
             const isAdded = addedIds[item.id];
-
             return (
               <div
                 key={item.id}
-                className={`bg-white border p-5 flex flex-col justify-between transition ${
-                  isUnavailable
-                    ? 'border-[#E2D9C5] opacity-60'
-                    : 'border-[#E2D9C5] hover:border-[#8C3B2B]'
-                }`}
+                className="rounded-3xl bg-white border border-[#EDE5D8] p-4 shadow-[0_20px_50px_rgba(28,24,21,0.06)] hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 border-b border-[#F2ECE1] pb-2 mb-2">
-                    <div>
-                      <span className="text-[10px] font-mono-tech uppercase text-[#2E5A44] font-bold block">
-                        {item.badge || item.catName}
-                      </span>
-                      <h4 className="font-bold text-[#14110F] text-lg font-serif-editorial">
-                        {item.name}
-                      </h4>
-                    </div>
-                    <span className="text-base font-bold text-[#8C3B2B] font-mono-tech shrink-0">
-                      {isUnavailable ? 'SOLD OUT' : item.price}
+                  <div className="relative h-48 rounded-2xl overflow-hidden bg-[#F5F0E6] mb-4">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute top-3 left-3 px-3 py-1 rounded-full bg-white/90 backdrop-blur-md text-[10px] font-bold uppercase tracking-wider text-[#9E4734]">
+                      {item.badge}
                     </span>
                   </div>
-                  {item.extraOption && (
-                    <p className="text-xs text-[#9A6B2F] font-semibold mb-1">{item.extraOption}</p>
-                  )}
-                  <p className="text-xs text-[#5C5349] leading-relaxed">{item.description}</p>
+
+                  <div className="px-1">
+                    <div className="flex items-start justify-between gap-2 mb-1.5">
+                      <h3 className="font-serif text-lg font-bold text-[#1C1815] leading-snug">
+                        {item.title}
+                      </h3>
+                      <span className="font-serif text-base font-bold text-[#9E4734] shrink-0">
+                        {item.price}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#6E6358] leading-relaxed line-clamp-3">
+                      {item.description}
+                    </p>
+                  </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#F2ECE1] flex items-center justify-between text-xs">
-                  <span className="text-[#8C8275] italic">Made fresh to order</span>
-                  <button
-                    onClick={() => handleAdd(item)}
-                    disabled={isUnavailable}
-                    className={`px-3 py-1.5 text-xs font-bold uppercase tracking-wider flex items-center gap-1 cursor-pointer ${
-                      isUnavailable
-                        ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
-                        : isAdded
-                        ? 'bg-[#2E5A44] text-white'
-                        : 'bg-[#8C3B2B] hover:bg-[#732F22] text-white'
-                    }`}
-                  >
-                    {isAdded ? '✓ Added' : isUnavailable ? 'Sold Out' : '+ Add to Order'}
-                  </button>
-                </div>
+                <button
+                  disabled={!item.inStock}
+                  onClick={() =>
+                    handleAdd({
+                      id: item.id,
+                      name: item.title,
+                      price: item.price,
+                      numericPrice: item.singlePrice
+                    })
+                  }
+                  className={`mt-4 w-full py-2.5 px-4 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                    !item.inStock
+                      ? 'bg-[#F2ECE1] text-[#A59B8F] cursor-not-allowed'
+                      : isAdded
+                      ? 'bg-[#3A5A40] text-white'
+                      : 'bg-[#F4EFE6] hover:bg-[#9E4734] text-[#1C1815] hover:text-white'
+                  }`}
+                >
+                  {isAdded ? (
+                    <>
+                      <Check className="w-3.5 h-3.5" />
+                      <span>Added to Order</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add to Order • {item.price}</span>
+                    </>
+                  )}
+                </button>
               </div>
             );
           })}
         </div>
       </section>
 
-      {/* 6. Reviews & Footer */}
-      <section className="py-12 bg-[#F3EDE0] border-t border-[#E2D9C5] px-4">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <h3 className="text-3xl font-bold font-serif-editorial text-center text-[#14110F]">
-            5-Star Love from Our Guests
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {customerReviews.map(r => (
-              <div key={r.id} className="bg-white border border-[#E2D9C5] p-4 flex flex-col justify-between space-y-3">
-                <div>
-                  <div className="text-[#C89D54] text-xs font-bold mb-1">★★★★★ {r.date}</div>
-                  <p className="text-xs text-[#3D352E] italic">“{r.quote}”</p>
-                </div>
-                <div className="text-xs font-bold text-[#14110F] border-t border-[#F2ECE1] pt-2">
-                  {r.author} • <span className="font-normal text-[#5C5349]">{r.location}</span>
-                </div>
+      {/* EDITORIAL RICE-PAPER MENU SPREAD */}
+      <section id="menu" className="max-w-6xl mx-auto px-4 py-16">
+        <div className="rounded-[2.5rem] bg-white border border-[#EAE0D0] p-6 sm:p-12 shadow-[0_25px_70px_rgba(28,24,21,0.06)]">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[#EFE8DC]">
+            <div>
+              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#9E4734] block mb-2">
+                Spring Lake Culinary Index
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl font-bold text-[#1C1815]">
+                Complete Kitchen &amp; Sushi Menu
+              </h2>
+            </div>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+              <div className="relative min-w-[260px]">
+                <Search className="w-4 h-4 text-[#8C8073] absolute left-4 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Search any dish or sushi roll..."
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[#FAF7F2] border border-[#E2D9C8] text-xs text-[#1C1815] placeholder-[#8C8073] focus:outline-none focus:border-[#9E4734]"
+                />
               </div>
-            ))}
+              <button
+                onClick={() => setIsPrintableMenuOpen(true)}
+                className="px-4 py-2.5 rounded-full bg-[#F4EFE6] hover:bg-[#E8DFD1] text-[#1C1815] text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
+              >
+                <FileImage className="w-3.5 h-3.5 text-[#9E4734]" />
+                <span>Official Menu Boards</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Pill Category Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-6">
+            {categories.map(cat => {
+              const active = activeCategory === cat.key;
+              return (
+                <button
+                  key={cat.key}
+                  onClick={() => setActiveCategory(cat.key)}
+                  className={`px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer ${
+                    active
+                      ? 'bg-[#9E4734] text-white font-bold shadow-sm'
+                      : 'bg-[#FAF7F2] hover:bg-[#F0E9DC] text-[#5C5248]'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Menu Categories */}
+          <div className="space-y-12 mt-2">
+            {Object.entries(menu).map(([catKey, categoryObj]) => {
+              if (activeCategory !== 'all' && activeCategory !== catKey) return null;
+
+              const filteredItems = (categoryObj.items || []).filter(item => {
+                if (item.hidden) return false;
+                if (!searchQuery.trim()) return true;
+                const q = searchQuery.toLowerCase();
+                return (
+                  item.name.toLowerCase().includes(q) ||
+                  (item.description && item.description.toLowerCase().includes(q))
+                );
+              });
+
+              if (filteredItems.length === 0) return null;
+
+              return (
+                <div key={catKey} className="space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-[#EFE8DC] pb-3">
+                    <div>
+                      <h3 className="font-serif text-2xl font-bold text-[#1C1815]">
+                        {categoryObj.categoryName}
+                      </h3>
+                      <p className="text-xs text-[#6E6358] mt-0.5">{categoryObj.tagline}</p>
+                    </div>
+                    {categoryObj.note && (
+                      <span className="text-xs italic text-[#9E4734]">{categoryObj.note}</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {filteredItems.map(item => {
+                      const isAdded = addedIds[item.id];
+                      const thumb = DISH_THUMBNAILS[item.id];
+                      const available = item.inStock;
+
+                      return (
+                        <div
+                          key={item.id}
+                          className="rounded-2xl bg-[#FAF7F2] hover:bg-[#F4EFE6] border border-[#EDE4D5] p-4 sm:p-5 transition flex items-start justify-between gap-4"
+                        >
+                          {thumb && (
+                            <img
+                              src={thumb}
+                              alt={item.name}
+                              className="w-20 h-20 rounded-2xl object-cover shrink-0 hidden sm:block"
+                            />
+                          )}
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-wrap items-center gap-2 mb-1">
+                              <h4 className="font-serif text-base sm:text-lg font-bold text-[#1C1815]">
+                                {item.name}
+                              </h4>
+                              {item.badge && (
+                                <span className="px-2.5 py-0.5 rounded-full bg-[#9E4734]/10 text-[#9E4734] text-[10px] font-bold">
+                                  {item.badge}
+                                </span>
+                              )}
+                            </div>
+                            {item.description && (
+                              <p className="text-xs text-[#5C5248] leading-relaxed">
+                                {item.description}
+                              </p>
+                            )}
+                            {item.extraOption && (
+                              <p className="text-[11px] text-[#3A5A40] font-semibold mt-1.5">
+                                + {item.extraOption}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col items-end justify-between self-stretch shrink-0">
+                            <span className="font-serif text-base sm:text-lg font-bold text-[#9E4734]">
+                              {item.price}
+                            </span>
+                            <button
+                              disabled={!available}
+                              onClick={() => handleAdd(item)}
+                              className={`mt-3 w-9 h-9 rounded-full flex items-center justify-center transition cursor-pointer ${
+                                !available
+                                  ? 'bg-[#E6DEC8] text-[#9E9488] cursor-not-allowed'
+                                  : isAdded
+                                  ? 'bg-[#3A5A40] text-white'
+                                  : 'bg-white hover:bg-[#9E4734] text-[#1C1815] hover:text-white border border-[#E2D9C8]'
+                              }`}
+                            >
+                              {isAdded ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      <footer className="bg-[#231F1C] text-[#D5CCC0] py-10 px-4 text-xs">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <strong className="text-white font-serif-editorial text-lg block">
-              Rice, Roots &amp; Rolls — An Asian Kitchen
-            </strong>
-            <span>1124 N Bragg Blvd, Spring Lake, NC 28390 • {businessInfo.phone}</span>
+      {/* MAGAZINE SPREAD: RICE • ROOTS • ROLLS & CHEF A */}
+      <section id="atelier-story" className="max-w-6xl mx-auto px-4 py-16 space-y-12">
+        <div className="text-center max-w-2xl mx-auto">
+          <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#9E4734] block mb-2">
+            Family Heritage &amp; Meaning
+          </span>
+          <h2 className="font-serif text-4xl font-bold text-[#1C1815]">
+            Rice • Roots • Rolls
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {meaningPillars.map(pillar => (
+            <div
+              key={pillar.id}
+              className="rounded-3xl bg-white border border-[#EAE0D0] overflow-hidden shadow-[0_20px_50px_rgba(28,24,21,0.05)] flex flex-col justify-between"
+            >
+              <div>
+                <img src={pillar.image} alt={pillar.title} className="w-full h-56 object-cover" />
+                <div className="p-6">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#9E4734]">
+                    {pillar.subtitle}
+                  </span>
+                  <h3 className="font-serif text-2xl font-bold text-[#1C1815] mt-1 mb-3">
+                    {pillar.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-[#5C5248] leading-relaxed italic">
+                    “{pillar.quote}”
+                  </p>
+                </div>
+              </div>
+              <div className="px-6 pb-5 text-[11px] font-semibold text-[#8C8073]">
+                — Chef A (Leakhena Ouk-Hester)
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* BRAGG BLVD WAYFINDING & VISIT CARD */}
+      <section id="visit" className="max-w-6xl mx-auto px-4 py-12">
+        <div className="rounded-[2.25rem] bg-[#F2ECE1] border border-[#E2D9C8] p-6 sm:p-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+          <div className="lg:col-span-7 space-y-4">
+            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#3A5A40]">
+              Easy Bragg Blvd Wayfinding
+            </span>
+            <h2 className="font-serif text-3xl font-bold text-[#1C1815]">
+              Visit Us at 1124 N Bragg Blvd
+            </h2>
+            <div className="space-y-2.5">
+              {businessInfo.wayfindingLandmarks.map((w, i) => (
+                <div key={i} className="rounded-2xl bg-white/80 p-4 border border-[#E5DEC9]">
+                  <div className="text-xs font-bold text-[#1C1815]">{w.direction}</div>
+                  <div className="text-xs text-[#5C5248] mt-1">{w.cue}</div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex flex-wrap gap-4">
+
+          <div className="lg:col-span-5 rounded-3xl bg-white p-6 border border-[#E5DEC9] shadow-sm space-y-4">
+            <h3 className="font-serif text-xl font-bold text-[#1C1815]">Kitchen Hours &amp; GPS</h3>
+            {businessInfo.hoursSchedule.map((h, i) => (
+              <div key={i} className="flex justify-between text-xs py-2 border-b border-[#F2ECE1]">
+                <span className="text-[#5C5248]">{h.days}</span>
+                <span className="font-bold text-[#1C1815]">{h.hours}</span>
+              </div>
+            ))}
+            <div className="flex flex-wrap gap-2 pt-2">
+              <a
+                href={businessInfo.appleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 py-2.5 px-4 rounded-full bg-[#1C1815] text-white text-xs font-bold text-center"
+              >
+                Apple Maps
+              </a>
+              <a
+                href={businessInfo.googleMapsDirectionsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="flex-1 py-2.5 px-4 rounded-full bg-[#9E4734] text-white text-xs font-bold text-center"
+              >
+                Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer className="border-t border-[#E6DEC8] bg-[#F4EFE6] py-10 px-4 mt-12">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#6E6358]">
+          <div>
+            <strong className="text-[#1C1815]">Rice, Roots &amp; Rolls – An Asian Kitchen</strong> • {businessInfo.address} • {businessInfo.phone}
+          </div>
+          <div className="flex gap-3">
             <button
               onClick={() => setIsChefAdminOpen(true)}
-              className="text-[#E5C17B] hover:underline cursor-pointer font-bold"
+              className="px-4 py-2 rounded-full bg-white border border-[#E2D9C8] text-[#9E4734] font-semibold cursor-pointer"
             >
-              👩‍🍳 Chef A iPhone Edit
+              Chef A Pocket Admin
             </button>
             <button
               onClick={() => setIsSchemaWhitePageOpen(true)}
-              className="text-[#A5D6B5] hover:underline cursor-pointer font-bold"
+              className="px-4 py-2 rounded-full bg-white border border-[#E2D9C8] text-[#1C1815] cursor-pointer"
             >
-              🔍 Schema.org &amp; Google Sync Brief
+              SEO &amp; Schema White Paper
             </button>
           </div>
         </div>

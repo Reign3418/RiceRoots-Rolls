@@ -4,359 +4,424 @@ import {
   Phone,
   MapPin,
   Navigation,
+  Sparkles,
   Check,
   Plus,
-  Image as ImageIcon,
-  UtensilsCrossed,
+  Search,
+  Utensils,
+  FileImage,
+  Flame,
   Fish,
-  Heart,
-  ChefHat,
-  SearchCode
+  Clock,
+  Compass
 } from 'lucide-react';
+
+const DISH_THUMBNAILS = {
+  se_kathiew: './images/hero-khmer-beef.png',
+  se_bai_saik_chruk: './images/hero-khmer-beef.png',
+  se_noodle_bowl: './images/catering-egg-rolls.jpg',
+  sq_wyoming_cowboy: './images/specialty-sushi-closeup.jpg',
+  sq_screaming_eagle: './images/rainbow-roll-cutout.png',
+  sq_24th_id: './images/specialty-sushi-closeup.jpg',
+  sq_all_american: './images/rainbow-roll-cutout.png',
+  ss_khmer_crudo: './images/khmer-crudo.jpg',
+  ss_tempura_battered: './images/shrimp-tempura.jpg',
+  cr_rainbow: './images/rainbow-roll-cutout.png',
+  cr_dragon: './images/specialty-sushi-closeup.jpg',
+  cr_shrimp_tempura: './images/shrimp-tempura.jpg',
+  st_egg_rolls: './images/catering-egg-rolls.jpg',
+  st_shrimp_tempura: './images/shrimp-tempura.jpg',
+  ch_sesame_chicken: './images/catering-buffet.jpg'
+};
 
 export default function SushiCraftBoardLayout() {
   const {
     businessInfo,
     meaningPillars,
-    chefStoryParagraphs,
-    cateringGallery,
     menu,
+    specials,
     liveStatus,
     addToCart,
+    setIsPrintableMenuOpen,
     setIsChefAdminOpen,
     setIsSchemaWhitePageOpen
   } = useKitchen();
 
-  const [activeBoard, setActiveBoard] = useState('dualBoard'); // 'dualBoard' | 'storyPhotos' | 'originalBoards'
+  // Station filter: 'all' | 'wok' | 'sushi'
+  const [stationMode, setStationMode] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [addedIds, setAddedIds] = useState({});
 
   const handleAdd = (item) => {
     addToCart(item);
     setAddedIds(prev => ({ ...prev, [item.id]: true }));
-    setTimeout(() => setAddedIds(prev => ({ ...prev, [item.id]: false })), 1400);
+    setTimeout(() => setAddedIds(prev => ({ ...prev, [item.id]: false })), 1300);
   };
 
-  return (
-    <div className="bg-[#161917] text-[#F4F1EA] min-h-screen w-full max-w-full overflow-x-hidden">
-      {/* 1. Top Nori Slate Bar */}
-      <div className="bg-[#0F1210] border-b border-[#2A312D] py-2 px-3 text-xs">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-mono-tech text-[#D4AF37] uppercase font-bold text-[11px] bg-[#1F2622] px-2 py-0.5 border border-[#D4AF37]/40">
-              {liveStatus.badgeText}
-            </span>
-            <span className="text-[#CBD2CE]">{liveStatus.headline}</span>
-          </div>
-          <div className="flex items-center gap-3 font-mono-tech text-xs">
-            <a href={`tel:${businessInfo.phoneRaw}`} className="text-[#D4AF37] font-bold hover:underline">
-              📞 {businessInfo.phone}
-            </a>
-            <span>•</span>
-            <a href={businessInfo.googleMapsShortUrl} target="_blank" rel="noreferrer" className="text-[#8FB99E] hover:underline">
-              📍 1124 N Bragg Blvd
-            </a>
-          </div>
-        </div>
-      </div>
+  const sushiCategories = ['squadLeaderSushi', 'sushiStarters', 'classicRolls'];
+  const wokCategories = ['southeastSpecials', 'chefsSpecials', 'startersAndSides', 'soups', 'chineseFavorites'];
 
-      {/* 2. Craft Board Header */}
-      <header className="bg-[#1C211E] border-b border-[#2E3631] py-5 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <img
-              src="./images/rainbow-roll-cutout.png"
-              alt="Hand-Rolled Sushi"
-              className="w-16 h-16 sm:w-20 sm:h-20 object-contain bg-[#121513] border border-[#D4AF37]/50 p-1"
-            />
+  return (
+    <div className="min-h-screen bg-[#121614] text-[#F2EFE9] selection:bg-[#D4A359] selection:text-[#121614] overflow-x-hidden">
+      {/* Top App Pill Bar */}
+      <header className="sticky top-3 z-40 px-4 pt-2">
+        <div className="max-w-6xl mx-auto rounded-full bg-[#1B211E]/90 backdrop-blur-2xl border border-white/10 px-5 py-3 shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-[#4A7C59] text-white flex items-center justify-center font-serif font-bold text-lg">
+              R
+            </div>
             <div>
-              <span className="text-[#8FB99E] font-mono-tech text-xs tracking-widest uppercase block font-bold">
-                Side-by-Side Kitchen &amp; Sushi Craft Edition
-              </span>
-              <h1 className="text-3xl sm:text-5xl font-bold text-white font-serif-editorial tracking-wide">
+              <span className="font-serif text-lg sm:text-xl font-bold text-white block leading-none">
                 Rice, Roots &amp; Rolls
-              </h1>
-              <p className="text-xs text-[#A3ADA7] font-mono-tech mt-0.5">
-                1124 N Bragg Blvd, Spring Lake, NC • Cambodian Kitchen, Chinese Classics &amp; Sushi Bar
-              </p>
+              </span>
+              <span className="text-[10px] uppercase tracking-[0.2em] text-[#84B593] font-semibold block mt-1">
+                Interactive Kitchen &amp; Sushi Bar
+              </span>
             </div>
           </div>
 
-          {/* Board View Switcher */}
-          <div className="flex items-center gap-1.5 bg-[#111412] p-1.5 border border-[#2E3631] overflow-x-auto max-w-full scrollbar-none">
+          {/* Interactive Station Switcher Pill inside Navbar */}
+          <div className="hidden md:flex items-center bg-black/35 p-1 rounded-full border border-white/10">
             <button
-              onClick={() => setActiveBoard('dualBoard')}
-              className={`px-3.5 py-2 text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeBoard === 'dualBoard'
-                  ? 'bg-[#D4AF37] text-[#14110F]'
-                  : 'text-[#CBD2CE] hover:text-white'
+              onClick={() => setStationMode('all')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                stationMode === 'all'
+                  ? 'bg-[#D4A359] text-[#121614]'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <UtensilsCrossed className="w-3.5 h-3.5" />
-              <span>1. Kitchen + Sushi Dual Board</span>
+              All Stations (36)
             </button>
             <button
-              onClick={() => setActiveBoard('storyPhotos')}
-              className={`px-3.5 py-2 text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeBoard === 'storyPhotos'
-                  ? 'bg-[#4A7C59] text-white'
-                  : 'text-[#CBD2CE] hover:text-white'
+              onClick={() => setStationMode('wok')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                stationMode === 'wok'
+                  ? 'bg-[#D4A359] text-[#121614]'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <Heart className="w-3.5 h-3.5" />
-              <span>2. Rice • Roots • Rolls Story</span>
+              <Flame className="w-3.5 h-3.5" />
+              <span>Hot Khmer &amp; Wok</span>
             </button>
             <button
-              onClick={() => setActiveBoard('originalBoards')}
-              className={`px-3.5 py-2 text-xs font-bold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
-                activeBoard === 'originalBoards'
-                  ? 'bg-[#B84A39] text-white'
-                  : 'text-[#CBD2CE] hover:text-white'
+              onClick={() => setStationMode('sushi')}
+              className={`px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                stationMode === 'sushi'
+                  ? 'bg-[#D4A359] text-[#121614]'
+                  : 'text-white/70 hover:text-white'
               }`}
             >
-              <ImageIcon className="w-3.5 h-3.5" />
-              <span>3. Original Menu Boards &amp; Reviews</span>
+              <Fish className="w-3.5 h-3.5" />
+              <span>Sushi &amp; Crudo Bar</span>
             </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsPrintableMenuOpen(true)}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/8 hover:bg-white/15 text-xs font-semibold text-white cursor-pointer"
+            >
+              <FileImage className="w-3.5 h-3.5 text-[#D4A359]" />
+              <span>Menu Boards</span>
+            </button>
+            <a
+              href={`tel:${businessInfo.phoneRaw}`}
+              className="px-4 py-2 rounded-full bg-[#D4A359] hover:bg-[#E0B26B] text-[#121614] font-bold text-xs flex items-center gap-1.5"
+            >
+              <Phone className="w-3.5 h-3.5" />
+              <span>{businessInfo.phone}</span>
+            </a>
           </div>
         </div>
       </header>
 
-      {/* 3. Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        {/* VIEW 1: DUAL BOARD (LEFT: MAIN KITCHEN | RIGHT: SUSHI BAR) */}
-        {activeBoard === 'dualBoard' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* LEFT BOARD: MAIN ASIAN & CAMBODIAN KITCHEN */}
-            <div className="bg-[#1C211E] border-2 border-[#D4AF37]/50 p-5 sm:p-7 space-y-6">
-              <div className="border-b-2 border-[#D4AF37] pb-3 flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] font-mono-tech uppercase text-[#D4AF37] font-bold">
-                    Board I • Wok, Broth &amp; Grill
-                  </span>
-                  <h2 className="text-3xl font-bold font-serif-editorial text-white">
-                    Main Kitchen Menu
-                  </h2>
-                </div>
-                <img
-                  src="./images/shrimp-tempura-cutout.png"
-                  alt="Shrimp Tempura"
-                  className="w-20 h-14 object-contain"
-                />
+      {/* VISUAL CUTOUT BENTO HERO */}
+      <section className="max-w-6xl mx-auto px-4 pt-8 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Main Visual App Card (6 cols) */}
+          <div className="lg:col-span-6 rounded-[2rem] bg-gradient-to-br from-[#1E2622] to-[#161B18] border border-white/10 p-7 sm:p-9 flex flex-col justify-between shadow-2xl">
+            <div className="space-y-4">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#4A7C59]/25 border border-[#4A7C59]/40 text-[#95D5B2] text-xs font-semibold">
+                <span className="w-2 h-2 rounded-full bg-[#95D5B2] animate-ping" />
+                <span>{liveStatus.badgeText}</span>
               </div>
 
-              {['southeastSpecials', 'chefsSpecials', 'chineseSpecials', 'appetizersAndDrinks'].map(catKey => {
-                const cat = menu[catKey];
-                if (!cat) return null;
-                return (
-                  <div key={catKey} className="space-y-3">
-                    <h3 className="text-lg font-bold font-serif-editorial text-[#D4AF37] uppercase tracking-wider border-b border-[#2E3631] pb-1">
-                      {cat.categoryName}
-                    </h3>
-                    <div className="space-y-2.5">
-                      {cat.items.filter(i => !i.hidden).map(item => {
-                        const isUnavailable = !item.inStock || (item.isWok && !liveStatus.wokOpen);
-                        const isAdded = addedIds[item.id];
-                        return (
-                          <div
-                            key={item.id}
-                            className="bg-[#141816] border border-[#2A312D] p-3.5 flex items-center justify-between gap-3"
-                          >
-                            <div className="space-y-0.5 flex-1">
-                              <div className="flex items-baseline justify-between gap-2">
-                                <h4 className="font-bold text-sm text-white">{item.name}</h4>
-                                <span className="font-mono-tech font-bold text-sm text-[#D4AF37]">
-                                  {isUnavailable ? 'SOLD OUT' : item.price}
-                                </span>
-                              </div>
-                              {item.description && (
-                                <p className="text-xs text-[#A3ADA7]">{item.description}</p>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => handleAdd(item)}
-                              disabled={isUnavailable}
-                              className={`px-2.5 py-1.5 text-xs font-bold shrink-0 cursor-pointer ${
-                                isUnavailable
-                                  ? 'bg-[#262B28] text-[#66706A]'
-                                  : isAdded
-                                  ? 'bg-[#4A7C59] text-white'
-                                  : 'bg-[#D4AF37] text-[#14110F]'
-                              }`}
-                            >
-                              {isAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+              <h1 className="font-serif text-4xl sm:text-5xl font-bold text-white leading-[1.08]">
+                Two Culinary Stations.{' '}
+                <span className="text-[#D4A359] italic font-normal">One Family Table.</span>
+              </h1>
+
+              <p className="text-sm sm:text-base text-[#B8C2BC] leading-relaxed">
+                Toggle between Chef A’s <strong className="text-white">Cambodian &amp; Wok Kitchen</strong> and our <strong className="text-white">Hand-Rolled Sushi Bar</strong> at 1124 N Bragg Blvd in Spring Lake.
+              </p>
             </div>
 
-            {/* RIGHT BOARD: HAND-ROLLED SUSHI BAR */}
-            <div className="bg-[#1C211E] border-2 border-[#4A7C59] p-5 sm:p-7 space-y-6">
-              <div className="border-b-2 border-[#4A7C59] pb-3 flex items-center justify-between">
-                <div>
-                  <span className="text-[11px] font-mono-tech uppercase text-[#8FB99E] font-bold">
-                    Board II • Sashimi, Standard Issue &amp; Squad Leader Rolls
-                  </span>
-                  <h2 className="text-3xl font-bold font-serif-editorial text-white">
-                    Hand-Rolled Sushi Menu
-                  </h2>
-                </div>
-                <img
-                  src="./images/khmer-crudo-cutout.png"
-                  alt="Khmer Crudo"
-                  className="w-20 h-14 object-contain"
-                />
-              </div>
-
-              {['squadLeaderSushi', 'sushiStartersAndStandard'].map(catKey => {
-                const cat = menu[catKey];
-                if (!cat) return null;
-                return (
-                  <div key={catKey} className="space-y-3">
-                    <h3 className="text-lg font-bold font-serif-editorial text-[#8FB99E] uppercase tracking-wider border-b border-[#2E3631] pb-1">
-                      {cat.categoryName}
-                    </h3>
-                    <div className="space-y-2.5">
-                      {cat.items.filter(i => !i.hidden).map(item => {
-                        const isUnavailable = !item.inStock || !liveStatus.sushiOpen;
-                        const isAdded = addedIds[item.id];
-                        return (
-                          <div
-                            key={item.id}
-                            className="bg-[#141816] border border-[#2A312D] p-3.5 flex items-center justify-between gap-3"
-                          >
-                            <div className="space-y-0.5 flex-1">
-                              <div className="flex items-baseline justify-between gap-2">
-                                <h4 className="font-bold text-sm text-white">{item.name}</h4>
-                                <span className="font-mono-tech font-bold text-sm text-[#D4AF37]">
-                                  {isUnavailable ? 'SOLD OUT' : item.price}
-                                </span>
-                              </div>
-                              {item.description && (
-                                <p className="text-xs text-[#A3ADA7]">{item.description}</p>
-                              )}
-                            </div>
-                            <button
-                              onClick={() => handleAdd(item)}
-                              disabled={isUnavailable}
-                              className={`px-2.5 py-1.5 text-xs font-bold shrink-0 cursor-pointer ${
-                                isUnavailable
-                                  ? 'bg-[#262B28] text-[#66706A]'
-                                  : isAdded
-                                  ? 'bg-[#4A7C59] text-white'
-                                  : 'bg-[#4A7C59] hover:bg-[#5B946C] text-white'
-                              }`}
-                            >
-                              {isAdded ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })}
+            {/* Mobile/Tablet Station Switcher Pills */}
+            <div className="flex flex-wrap gap-2 pt-6">
+              <button
+                onClick={() => setStationMode('all')}
+                className={`px-5 py-2.5 rounded-full text-xs font-bold transition cursor-pointer ${
+                  stationMode === 'all'
+                    ? 'bg-[#D4A359] text-[#121614]'
+                    : 'bg-white/8 text-white hover:bg-white/15'
+                }`}
+              >
+                All 36 Dishes
+              </button>
+              <button
+                onClick={() => setStationMode('wok')}
+                className={`px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                  stationMode === 'wok'
+                    ? 'bg-[#D4A359] text-[#121614]'
+                    : 'bg-white/8 text-white hover:bg-white/15'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5 text-[#D4A359]" />
+                <span>Khmer &amp; Wok Kitchen</span>
+              </button>
+              <button
+                onClick={() => setStationMode('sushi')}
+                className={`px-5 py-2.5 rounded-full text-xs font-bold flex items-center gap-1.5 transition cursor-pointer ${
+                  stationMode === 'sushi'
+                    ? 'bg-[#D4A359] text-[#121614]'
+                    : 'bg-white/8 text-white hover:bg-white/15'
+                }`}
+              >
+                <Fish className="w-3.5 h-3.5 text-[#84B593]" />
+                <span>Sushi &amp; Crudo Bar</span>
+              </button>
             </div>
           </div>
-        )}
 
-        {/* VIEW 2: RICE, ROOTS & ROLLS STORY + CATERING */}
-        {activeBoard === 'storyPhotos' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {meaningPillars.map(pillar => (
-                <div key={pillar.id} className="bg-[#1C211E] border border-[#2E3631] p-4 space-y-3">
-                  <img src={pillar.image} alt={pillar.title} className="w-full h-60 object-cover" />
-                  <h3 className="text-2xl font-bold font-serif-editorial text-[#D4AF37]">
-                    {pillar.title} — {pillar.subtitle}
-                  </h3>
-                  <p className="text-xs text-[#CBD2CE] italic leading-relaxed">“{pillar.quote}”</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="bg-[#1C211E] border border-[#2E3631] p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-              <div className="lg:col-span-4">
-                <img
-                  src="./images/chef-a-food-truck.jpg"
-                  alt="Chef A"
-                  className="w-full h-72 object-cover border border-[#D4AF37]"
-                />
-              </div>
-              <div className="lg:col-span-8 space-y-3 text-xs sm:text-sm text-[#CBD2CE]">
-                <h3 className="text-2xl font-bold font-serif-editorial text-white">
-                  Chef A’s Journey: From Far East Foodie in Lander, WY to Spring Lake, NC
-                </h3>
-                {chefStoryParagraphs.map((p, i) => (
-                  <p key={i}>{p}</p>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* VIEW 3: ORIGINAL MENU BOARDS & REAL YELP PROOF */}
-        {activeBoard === 'originalBoards' && (
-          <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-[#1C211E] border border-[#2E3631] p-4 space-y-2">
-                <h3 className="font-bold text-sm text-[#D4AF37]">Original Main Kitchen Menu Board</h3>
-                <img src="./images/menu-board-main.png" alt="Main Menu Board" className="w-full h-auto" />
-              </div>
-              <div className="bg-[#1C211E] border border-[#2E3631] p-4 space-y-2">
-                <h3 className="font-bold text-sm text-[#8FB99E]">Original Sushi Menu Board</h3>
-                <img src="./images/menu-board-sushi.png" alt="Sushi Menu Board" className="w-full h-auto" />
-              </div>
-            </div>
-            <div className="bg-[#1C211E] border border-[#2E3631] p-4 space-y-2">
-              <h3 className="font-bold text-sm text-[#D4AF37]">Verified 5-Star Customer Reviews</h3>
-              <img src="./images/yelp-reviews-proof.png" alt="Verified Reviews" className="w-full h-auto" />
-            </div>
-          </div>
-        )}
-
-        {/* Wayfinding Footer Strip */}
-        <div className="bg-[#1C211E] border-2 border-[#2E3631] p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <span className="text-xs font-mono-tech text-[#D4AF37] uppercase font-bold block">
-              Brick-and-Mortar Location • Easy Bragg Blvd Access
-            </span>
-            <h3 className="text-2xl font-bold font-serif-editorial text-white">
-              {businessInfo.address} • {businessInfo.phone}
-            </h3>
-            <p className="text-xs text-[#A3ADA7] mt-0.5">
-              Mon–Thu 11:00 AM – 8:00 PM • Fri–Sat 11:00 AM – 8:30 PM • Closed Sunday
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <a
-              href={businessInfo.googleMapsShortUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2.5 bg-[#D4AF37] text-[#14110F] font-extrabold text-xs uppercase tracking-wider"
+          {/* 3 Floating Cutout Bento Cards (6 cols) */}
+          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div
+              onClick={() => setStationMode('wok')}
+              className="rounded-3xl bg-[#1B211E] border border-white/10 hover:border-[#D4A359]/50 p-5 flex flex-col justify-between cursor-pointer group transition"
             >
-              Google Maps Pin
-            </a>
-            <a
-              href={businessInfo.appleMapsUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="px-4 py-2.5 bg-[#262B28] border border-[#3B423E] text-white font-bold text-xs uppercase tracking-wider"
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#D4A359]">
+                Khmer Wok
+              </span>
+              <img
+                src="./images/hero-khmer-beef.png"
+                alt="Khmer Beef & Herbs"
+                className="w-36 h-36 object-contain mx-auto my-2 drop-shadow-2xl group-hover:scale-105 transition"
+              />
+              <div>
+                <div className="font-serif text-base font-bold text-white">Kathiew &amp; Grill</div>
+                <div className="text-xs text-[#95A39B] mt-0.5">Cambodian Pho &amp; Pork</div>
+              </div>
+            </div>
+
+            <div
+              onClick={() => setStationMode('sushi')}
+              className="rounded-3xl bg-[#1B211E] border border-white/10 hover:border-[#D4A359]/50 p-5 flex flex-col justify-between cursor-pointer group transition"
             >
-              Apple Maps
-            </a>
-            <button
-              onClick={() => setIsChefAdminOpen(true)}
-              className="px-4 py-2.5 bg-[#4A7C59] text-white font-bold text-xs uppercase tracking-wider cursor-pointer"
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#84B593]">
+                Sushi Bar
+              </span>
+              <img
+                src="./images/rainbow-roll-cutout.png"
+                alt="Hand-Rolled Sushi"
+                className="w-36 h-36 object-contain mx-auto my-2 drop-shadow-2xl group-hover:scale-105 transition"
+              />
+              <div>
+                <div className="font-serif text-base font-bold text-white">Specialty Rolls</div>
+                <div className="text-xs text-[#95A39B] mt-0.5">Cowboy &amp; Eagle Rolls</div>
+              </div>
+            </div>
+
+            <div
+              onClick={() => setStationMode('sushi')}
+              className="rounded-3xl bg-[#1B211E] border border-white/10 hover:border-[#D4A359]/50 p-5 flex flex-col justify-between cursor-pointer group transition"
             >
-              👩‍🍳 Chef Edit
-            </button>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#E5C17B]">
+                Sashimi &amp; Tempura
+              </span>
+              <img
+                src="./images/shrimp-tempura-cutout.png"
+                alt="Shrimp Tempura"
+                className="w-36 h-36 object-contain mx-auto my-2 drop-shadow-2xl group-hover:scale-105 transition"
+              />
+              <div>
+                <div className="font-serif text-base font-bold text-white">Crudo &amp; Starters</div>
+                <div className="text-xs text-[#95A39B] mt-0.5">Khmer Crudo &amp; Tempura</div>
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+      </section>
+
+      {/* INTERACTIVE APP MENU BOARD */}
+      <section className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="font-serif text-3xl font-bold text-white">
+              {stationMode === 'wok'
+                ? '🔥 Hot Khmer & Wok Kitchen'
+                : stationMode === 'sushi'
+                ? '🍣 Hand-Rolled Sushi & Crudo Bar'
+                : 'Complete Interactive Menu (36 Dishes)'}
+            </h2>
+            <p className="text-xs text-[#95A39B] mt-1">
+              1124 N Bragg Blvd, Spring Lake, NC • Tap + to add dishes to your order bag
+            </p>
+          </div>
+
+          <div className="relative min-w-[260px]">
+            <Search className="w-4 h-4 text-[#84948B] absolute left-4 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Filter dishes, rolls, ingredients..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-full bg-[#1B211E] border border-white/10 text-xs text-white placeholder-[#84948B] focus:outline-none focus:border-[#D4A359]"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-10">
+          {Object.entries(menu).map(([catKey, categoryObj]) => {
+            if (stationMode === 'sushi' && !sushiCategories.includes(catKey)) return null;
+            if (stationMode === 'wok' && !wokCategories.includes(catKey)) return null;
+
+            const filteredItems = (categoryObj.items || []).filter(item => {
+              if (item.hidden) return false;
+              if (!searchQuery.trim()) return true;
+              const q = searchQuery.toLowerCase();
+              return (
+                item.name.toLowerCase().includes(q) ||
+                (item.description && item.description.toLowerCase().includes(q))
+              );
+            });
+
+            if (filteredItems.length === 0) return null;
+
+            return (
+              <div
+                key={catKey}
+                className="rounded-3xl bg-[#181D1A] border border-white/10 p-5 sm:p-8 space-y-5"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-4">
+                  <div>
+                    <h3 className="font-serif text-2xl font-bold text-white">
+                      {categoryObj.categoryName}
+                    </h3>
+                    <p className="text-xs text-[#95A39B]">{categoryObj.tagline}</p>
+                  </div>
+                  {categoryObj.note && (
+                    <span className="px-3.5 py-1 rounded-full bg-white/5 text-xs text-[#D4A359]">
+                      {categoryObj.note}
+                    </span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredItems.map(item => {
+                    const isAdded = addedIds[item.id];
+                    const thumb = DISH_THUMBNAILS[item.id];
+                    const available = item.inStock;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-2xl bg-[#202623] hover:bg-[#262D29] border border-white/8 p-4 flex flex-col justify-between transition"
+                      >
+                        <div className="space-y-2.5">
+                          {thumb && (
+                            <img
+                              src={thumb}
+                              alt={item.name}
+                              className="w-full h-36 rounded-xl object-cover mb-2"
+                            />
+                          )}
+                          <div className="flex items-start justify-between gap-2">
+                            <h4 className="font-serif text-base font-bold text-white">
+                              {item.name}
+                            </h4>
+                            <span className="font-serif text-base font-bold text-[#D4A359] shrink-0">
+                              {item.price}
+                            </span>
+                          </div>
+                          {item.description && (
+                            <p className="text-xs text-[#A3B0A8] leading-relaxed">
+                              {item.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <button
+                          disabled={!available}
+                          onClick={() => handleAdd(item)}
+                          className={`mt-4 w-full py-2.5 rounded-full text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                            !available
+                              ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                              : isAdded
+                              ? 'bg-[#4A7C59] text-white'
+                              : 'bg-white/10 hover:bg-[#D4A359] text-white hover:text-[#121614]'
+                          }`}
+                        >
+                          {isAdded ? (
+                            <>
+                              <Check className="w-3.5 h-3.5" />
+                              <span>Added</span>
+                            </>
+                          ) : (
+                            <>
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Add • {item.price}</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* QUICK WAYFINDING & STORY BENTO */}
+      <section className="max-w-6xl mx-auto px-4 py-12">
+        <div className="rounded-3xl bg-[#1B211E] border border-white/10 p-6 sm:p-8 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+          <div className="lg:col-span-4">
+            <img
+              src="./images/chef-a-food-truck.jpg"
+              alt="Chef A in front of Far East Foodie truck"
+              className="w-full h-60 object-cover rounded-2xl"
+            />
+          </div>
+          <div className="lg:col-span-8 space-y-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-[#D4A359]">
+              Chef A • From Lander, WY to 1124 N Bragg Blvd
+            </span>
+            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-white">
+              Crafted with love for our boys &amp; our Spring Lake community.
+            </h3>
+            <p className="text-xs sm:text-sm text-[#A3B0A8] leading-relaxed">
+              {businessInfo.originStoryShort} Find us right at 1124 N Bragg Blvd with dedicated front parking just 5 minutes from Fort Bragg.
+            </p>
+            <div className="flex flex-wrap gap-3 pt-2">
+              <a
+                href={businessInfo.googleMapsDirectionsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-5 py-2.5 rounded-full bg-[#D4A359] text-[#121614] text-xs font-bold"
+              >
+                Google Maps Directions
+              </a>
+              <button
+                onClick={() => setIsChefAdminOpen(true)}
+                className="px-5 py-2.5 rounded-full bg-white/10 text-white text-xs font-semibold cursor-pointer"
+              >
+                Chef A Pocket Admin
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

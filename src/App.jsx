@@ -17,27 +17,28 @@ function AppContent() {
     themeVersion,
     businessInfo,
     cartItemCount,
+    cartSubtotal,
     setIsCartOpen,
     setIsChefAdminOpen
   } = useKitchen();
 
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans pb-16 md:pb-0 w-full max-w-full overflow-x-hidden relative ${
+      className={`min-h-screen flex flex-col font-sans pb-20 md:pb-0 w-full max-w-full overflow-x-hidden relative ${
         themeVersion === 'jasmine'
-          ? 'bg-[#FAF6EE] text-[#231F1C]'
+          ? 'bg-[#FAF7F2] text-[#1C1815]'
           : themeVersion === 'craftboard'
-          ? 'bg-[#161917] text-[#F4F1EA]'
-          : 'bg-[#14110F] text-[#F5F0E6]'
+          ? 'bg-[#121614] text-[#F2EFE9]'
+          : 'bg-[#0F0D0B] text-[#F5EFE6]'
       }`}
     >
-      {/* Top 3-Concept Switcher & Operator Tools Bar */}
+      {/* Floating Bottom-Right 3-Concept Switcher & Chef Tools Pill */}
       <DesignSwitcherBar />
 
       {/* Active Website Concept Layout */}
       <Suspense
         fallback={
-          <div className="min-h-screen flex items-center justify-center text-[#C89D54] font-serif-editorial text-xl">
+          <div className="min-h-screen flex items-center justify-center text-[#C89D54] font-serif text-xl">
             Loading Rice, Roots &amp; Rolls...
           </div>
         }
@@ -58,15 +59,27 @@ function AppContent() {
 
       <OrderDrawer />
 
-      {/* =================================================================== */}
-      {/* iPHONE & MOBILE STICKY BOTTOM ACTION BAR (<768px)                   */}
-      {/* =================================================================== */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-[#362E26] bg-[#14110F]/95 backdrop-blur-md p-2 flex items-center gap-1.5 shadow-2xl">
+      {/* Desktop Floating Order Bag Capsule when items are in cart */}
+      {cartItemCount > 0 && (
+        <button
+          onClick={() => setIsCartOpen(true)}
+          className="hidden md:flex fixed bottom-6 left-6 z-50 items-center gap-3 px-5 py-3.5 rounded-full bg-[#C89D54] hover:bg-[#D7AE66] text-[#120F0D] font-bold text-xs shadow-[0_20px_50px_rgba(0,0,0,0.65)] transition cursor-pointer"
+        >
+          <ShoppingBag className="w-4 h-4" />
+          <span>Your Order Bag ({cartItemCount})</span>
+          <span className="px-2.5 py-0.5 rounded-full bg-black/15 font-extrabold">
+            ${cartSubtotal.toFixed(2)}
+          </span>
+        </button>
+      )}
+
+      {/* iPhone & Mobile Floating Frosted-Glass Action Capsule (<768px) */}
+      <div className="md:hidden fixed bottom-3 left-3 right-3 z-40 rounded-full border border-white/15 bg-[#161311]/90 backdrop-blur-2xl p-1.5 flex items-center gap-1.5 shadow-[0_20px_50px_rgba(0,0,0,0.75)]">
         <a
           href={`tel:${businessInfo.phoneRaw}`}
-          className="flex-1 flex items-center justify-center gap-1.5 bg-[#2E5A44] text-white font-extrabold py-2.5 px-2 rounded-none text-xs uppercase tracking-wider border border-[#4A7C59]"
+          className="flex-1 flex items-center justify-center gap-1.5 bg-[#2E5A44] text-white font-bold py-2.5 px-3 rounded-full text-xs"
         >
-          <Phone className="w-3.5 h-3.5 text-[#C89D54]" />
+          <Phone className="w-3.5 h-3.5 text-[#E5C17B]" />
           <span>Call</span>
         </a>
 
@@ -74,7 +87,7 @@ function AppContent() {
           href={businessInfo.googleMapsShortUrl}
           target="_blank"
           rel="noreferrer"
-          className="flex-1 flex items-center justify-center gap-1.5 bg-[#C89D54] text-[#14110F] font-extrabold py-2.5 px-2 rounded-none text-xs uppercase tracking-wider"
+          className="flex-1 flex items-center justify-center gap-1.5 bg-[#C89D54] text-[#14110F] font-bold py-2.5 px-3 rounded-full text-xs"
         >
           <Navigation className="w-3.5 h-3.5" />
           <span>Directions</span>
@@ -82,19 +95,19 @@ function AppContent() {
 
         <button
           onClick={() => setIsChefAdminOpen(true)}
-          className="flex items-center justify-center gap-1 bg-[#241E1A] border border-[#3D332B] text-[#E6DEC8] font-bold py-2.5 px-2.5 rounded-none text-xs uppercase tracking-wider cursor-pointer"
+          className="flex items-center justify-center gap-1 bg-white/10 text-[#F5EFE6] font-semibold py-2.5 px-3 rounded-full text-xs cursor-pointer"
         >
           <ChefHat className="w-3.5 h-3.5 text-[#C89D54]" />
-          <span>Edit</span>
+          <span>Chef</span>
         </button>
 
         {cartItemCount > 0 && (
           <button
             onClick={() => setIsCartOpen(true)}
-            className="flex-1 flex items-center justify-center gap-1 bg-[#8C3B2B] text-white font-extrabold py-2.5 px-2 rounded-none text-xs uppercase tracking-wider border border-[#C89D54] cursor-pointer"
+            className="flex-1 flex items-center justify-center gap-1 bg-[#9E4734] text-white font-bold py-2.5 px-3 rounded-full text-xs cursor-pointer"
           >
             <ShoppingBag className="w-3.5 h-3.5" />
-            <span>Tray ({cartItemCount})</span>
+            <span>Bag ({cartItemCount})</span>
           </button>
         )}
       </div>
