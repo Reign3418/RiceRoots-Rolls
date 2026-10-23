@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# AI Search & Answer Engine Discovery (GEO)
+# See /llms.txt for structured menu, pricing, hours, and Bragg Blvd wayfinding
+Sitemap: https://ricerootsandrolls.com/sitemap.xml
